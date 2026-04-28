@@ -1,6 +1,5 @@
 import React from 'react';
 
-// الأقسام العامة باللغة الإنجليزية
 const categories = [
   { id: 'necklaces', name: 'Necklaces', image: '/images/cat-necklaces.png' },
   { id: 'rings', name: 'Rings', image: '/images/cat-rings.png' },
@@ -8,55 +7,58 @@ const categories = [
   { id: 'earrings', name: 'Earrings', image: '/images/cat-earrings.png' },
 ];
 
-const CategoriesGrid = ({ brand }) => {
+const CategoriesGrid = ({ brand = "KLEO" }) => {
   return (
-    <section className="w-full py-12 px-4 max-w-[1400px] mx-auto">
+    // تم تقليل الـ padding الكلي للملف لجعل المحتوى أكثر تركيزاً
+    <section className="w-full py-12 px-4 max-w-[1200px] mx-auto bg-white">
       
-      {/* الهيدر: Shop All يساراً، اسم البراند يميناً */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6">
-        
-        {/* رابط Shop All على اليسار */}
+      {/* الهيدر: SHOP ALL يساراً، البراند يميناً */}
+      <div className="flex justify-between items-center mb-10 border-b border-gray-100 pb-6">
         <a 
-          href={`/shop/${brand.toLowerCase()}`} 
-          className="text-sm font-medium text-gray-800 hover:text-black transition-colors flex items-center gap-1 order-2 md:order-1"
+          href={`/shop`} 
+          className="group flex items-center gap-2 text-[9px] font-bold tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-all duration-500"
         >
-          <span>&larr;</span> Shop All
+          <span className="text-base group-hover:-translate-x-1 transition-transform">&larr;</span>
+          SHOP ALL
         </a>
 
-        {/* عنوان البراند على اليمين */}
-        <div className="flex items-center gap-4 order-1 md:order-2">
-          <div className="h-[2px] bg-gray-900 w-12 md:w-20"></div>
-          <h2 className="text-xl md:text-2xl font-bold uppercase tracking-wider text-gray-900">
-            {brand} JEWELRY
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl md:text-3xl font-black tracking-[0.25em] uppercase text-black">
+            {brand}
           </h2>
-          <div className="h-[2px] bg-gray-900 w-12 md:w-20"></div>
+          <div className="hidden md:block h-[1px] bg-black w-16"></div>
         </div>
-
       </div>
 
-      {/* الشبكة */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+      {/* الشبكة: تم تقليل المسافات gap وجعل الكاردات أصغر عبر زيادة عدد الأعمدة المحتملة */}
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 md:gap-4">
         {categories.map((cat) => (
           <div 
             key={cat.id} 
             className="group cursor-pointer flex flex-col"
-            onClick={() => console.log(`Maps to: ${brand} -> ${cat.id}`)} 
           >
-            {/* حاوية الصورة المربعة */}
-            <div className="relative aspect-square overflow-hidden bg-[#f4f4f4]">
+            {/* حاوية الصورة المربعة تماماً وأصغر حجماً */}
+            <div className="relative aspect-square overflow-hidden bg-[#f9f9f9] mb-3">
               <img 
                 src={cat.image} 
-                alt={`${brand} ${cat.name}`} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                alt={cat.name} 
+                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 grayscale hover:grayscale-0"
               />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
             </div>
             
-            {/* الشريط الملون */}
-            <div className="bg-[#dca68f] py-4 text-center">
-              <h3 className="text-white text-sm font-bold tracking-wide uppercase">
+            {/* الليبل: (+) يساراً، الاسم يميناً بمسافات أقرب */}
+            <div className="flex items-center justify-between">
+              <span className="text-lg font-light text-gray-300 group-hover:text-black transition-colors">
+                &#43;
+              </span>
+              
+              <h3 className="text-black text-[10px] font-bold tracking-[0.25em] uppercase transition-all">
                 {cat.name}
               </h3>
             </div>
+            
+            <div className="mt-2 h-[1px] w-0 group-hover:w-full bg-black transition-all duration-700 mx-auto"></div>
           </div>
         ))}
       </div>

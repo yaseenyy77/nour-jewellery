@@ -8,7 +8,7 @@ const Footer = () => {
         
         <div className="text-center">
           <h2 className="text-3xl font-black italic text-[#d4af37] tracking-tighter mb-2">NOUR GOLD</h2>
-          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em]">Luxury Investment Since 1995</p>
+          <p className="text-[10px] text-gray-400 uppercase tracking-[0.3em]">Luxury Investment Since 1984</p>
         </div>
 
         <div className="w-full border-y border-white/5 py-10">
