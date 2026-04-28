@@ -1,22 +1,32 @@
-# Logs
-logs
-*.log
+# المجلدات اللي بتنزل مع تثبيت المكتبات (تقيلة جداً وممنوع تترفع)
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# ملفات الـ Build والـ Logs
+bin/
+obj/
+out/
+.vercel/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
+# ملفات النظام (زي الماك والويندوز)
 .DS_Store
+Thumbs.db
+
+# ملفات البيانات السرية (زي مفاتيح الـ API)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ملفات خاصة بمحرر الكود (VS Code)
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
