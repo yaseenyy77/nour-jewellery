@@ -4,8 +4,8 @@ import tailwindcss from '@tailwindcss/vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  // ضيفنا السطر ده عشان المسارات تشتغل صح على GitHub Pages
-  base: '/nour-jewellery/', 
+  // شيلنا المسار القديم عشان يشتغل على فيرسيل بدون مشاكل
+  base: '/', 
   plugins: [
     react(),
     tailwindcss(),
