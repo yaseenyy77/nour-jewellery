@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vitejs.dev/config/
 export default defineConfig({
   // ضيفنا السطر ده عشان المسارات تشتغل صح على GitHub Pages
-  base: '/nour-g/', 
+  base: '/nour-jewellery/', 
   plugins: [
     react(),
     tailwindcss(),
