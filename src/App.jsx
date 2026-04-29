@@ -9,24 +9,22 @@ import Home from './features/home/Home';
 
 // --- ADMIN DASHBOARD COMPONENTS (لوحة التحكم) ---
 import AdminLayout from './dashboard/layout/AdminLayout';
-import AdminDashboard from './dashboard/AdminDashboard'; // ملف الداش بورد الرئيسي (Overview)
+import AdminDashboard from './dashboard/AdminDashboard'; 
 import ProductTable from './dashboard/features/product-management/ProductTable';
 
 /**
  * StoreLayout Component
- * هذا المكون يغلف صفحات المتجر فقط (الهيدر، الفوتر، والـ BottomNav)
  */
 const StoreLayout = ({ showBottomNav, footerRef }) => {
   return (
     <div className="min-h-screen bg-white">
       <Header />
       <main className="pb-20">
-        <Outlet /> {/* هنا تظهر صفحات المتجر مثل Home */}
+        <Outlet />
       </main>
       <div ref={footerRef}>
         <Footer />
       </div>
-      {/* الـ BottomNav تظهر فقط في صفحات المتجر */}
       <div className={`fixed bottom-0 w-full z-50 transition-opacity duration-300 ${
         showBottomNav ? 'opacity-100' : 'opacity-0 pointer-events-none'
       }`}>
@@ -40,7 +38,6 @@ function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const footerRef = useRef(null);
 
-  // منطق مراقبة الفوتر لإخفاء الـ BottomNav في المتجر
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -57,31 +54,18 @@ function App() {
     <Router>
       <Routes>
         
-        {/* ==========================================
-            1. ROUTES: CUSTOMER STORE (المتجر)
-           ========================================== */}
+        {/* مسارات المتجر: تفتح عبر الرابط الرئيسي / */}
         <Route element={<StoreLayout showBottomNav={showBottomNav} footerRef={footerRef} />}>
           <Route path="/" element={<Home />} />
-          {/* يمكنك إضافة مسارات المتجر الأخرى هنا مثل:
-              <Route path="/shop" element={<Shop />} /> 
-          */}
         </Route>
 
-        {/* ==========================================
-            2. ROUTES: ADMIN DASHBOARD (الأدمن)
-           ========================================== */}
-        {/* نستخدم الـ AdminLayout الذي يستدعي الـ Sidebar داخله */}
+        {/* مسارات لوحة التحكم: تفتح عبر الرابط /admin */}
         <Route path="/admin" element={<AdminLayout />}>
-          
-          {/* الصفحة الرئيسية للداش بورد (Overview) */}
+          {/* هذا المسار يفتح nour-jewellery.vercel.app/admin */}
           <Route index element={<AdminDashboard />} />
           
-          {/* صفحة جدول المنتجات */}
+          {/* هذا المسار يفتح nour-jewellery.vercel.app/admin/products */}
           <Route path="products" element={<ProductTable />} />
-          
-          {/* يمكنك إضافة مسارات الإدارة الأخرى هنا:
-              <Route path="orders" element={<Orders />} /> 
-          */}
         </Route>
 
       </Routes>
