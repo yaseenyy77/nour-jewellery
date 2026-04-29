@@ -23,7 +23,7 @@ const Sidebar = () => {
     <aside className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0">
       {/* Logo Section */}
       <div className="p-8 border-b border-gray-50">
-        <h1 className="text-2xl font-black tracking-tighter italic">KLEO ADMIN</h1>
+        <h1 className="text-2xl font-black tracking-tighter italic">NOUR ADMIN</h1>
       </div>
 
       {/* Navigation Links */}
