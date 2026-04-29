@@ -10,16 +10,17 @@ import {
 } from 'lucide-react';
 
 const menuItems = [
-  { name: 'Overview', icon: <LayoutDashboard size={20} />, path: '/admin/overview' },
-  { name: 'Products', icon: <Package size={20} />, path: '/admin/products' },
-  { name: 'Orders', icon: <ShoppingBag size={20} />, path: '/admin/orders' },
-  { name: 'Customers', icon: <Users size={20} />, path: '/admin/customers' },
-  { name: 'Settings', icon: <Settings size={20} />, path: '/admin/settings' },
+  { name: 'نظرة عامة', icon: <LayoutDashboard size={20} />, path: '/admin/overview' },
+  { name: 'المنتجات', icon: <Package size={20} />, path: '/admin/products' },
+  { name: 'الطلبات', icon: <ShoppingBag size={20} />, path: '/admin/orders' },
+  { name: 'العملاء', icon: <Users size={20} />, path: '/admin/customers' },
+  { name: 'الإعدادات', icon: <Settings size={20} />, path: '/admin/settings' },
 ];
 
 const Sidebar = () => {
   return (
-    <aside className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0">
+    /* غيرنا border-r لـ border-l لأن السايد بار بقى على اليمين */
+    <aside className="w-64 h-screen bg-white border-l border-gray-100 flex flex-col sticky top-0">
       {/* Logo Section */}
       <div className="p-8 border-b border-gray-50">
         <h1 className="text-2xl font-black tracking-tighter italic">KLEO ADMIN</h1>
@@ -39,7 +40,7 @@ const Sidebar = () => {
             `}
           >
             {item.icon}
-            {item.name}
+            <span>{item.name}</span>
           </NavLink>
         ))}
       </nav>
@@ -48,7 +49,7 @@ const Sidebar = () => {
       <div className="p-4 border-t border-gray-50">
         <button className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all">
           <LogOut size={20} />
-          Logout
+          تسجيل الخروج
         </button>
       </div>
     </aside>
