@@ -4,7 +4,6 @@ import Header from './components/layout/Header/Header';
 import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
-// استيراد ملف الداشبورد الجديد
 import AdminDashboard from './dashboard/AdminDashboard';
 
 function App() {
@@ -37,7 +36,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* مسارات الموقع الرئيسي - تظهر مع الـ Header والـ Footer */}
+        {/* مسار لوحة التحكم - يوضع أولاً لضمان الانفصال التام */}
+        <Route path="/admin" element={<AdminDashboard />}>
+          <Route path="overview" element={<div>Overview Page</div>} />
+          <Route path="products" element={<div>Products Management</div>} />
+          <Route path="orders" element={<div>Orders Page</div>} />
+          <Route path="customers" element={<div>Customers Page</div>} />
+          <Route path="settings" element={<div>Settings Page</div>} />
+        </Route>
+
+        {/* مسارات الموقع الرئيسي */}
         <Route
           path="/*"
           element={
@@ -46,7 +54,7 @@ function App() {
               <main className="pb-20">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  {/* تقدر تضيف باقي صفحات الموقع هنا */}
+                  {/* هنا تضاف باقي صفحات المتجر مثل /shop أو /gallery */}
                 </Routes>
               </main>
               <div ref={footerRef}>
@@ -60,13 +68,6 @@ function App() {
             </div>
           }
         />
-
-        {/* مسار لوحة التحكم - منفصل تماماً عن تصميم الموقع الرئيسي */}
-        <Route path="/admin/*" element={<AdminDashboard />}>
-          {/* هنا هتنزل الصفحات الداخلية للداشبورد زي Overview و Products في الـ Outlet */}
-          <Route path="overview" element={<div>Overview Page</div>} />
-          <Route path="products" element={<div>Products Management</div>} />
-        </Route>
       </Routes>
     </Router>
   );
