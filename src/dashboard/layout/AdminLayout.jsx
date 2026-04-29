@@ -4,11 +4,11 @@ import Sidebar from './Sidebar';
 
 const AdminLayout = () => {
   return (
-    /* أزلنا dir="rtl" ليعود التصميم للوضع الافتراضي (من اليسار لليمين) */
-    <div className="flex bg-[#fcfcfc] min-h-screen">
+    /* ضفنا dir="ltr" هنا بشكل صريح عشان نفرض الاتجاه من الشمال لليمين على لوحة التحكم بالكامل */
+    <div className="flex bg-[#fcfcfc] min-h-screen" dir="ltr">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        {/* TopNav لو عملته مستقبلاً سيكون مكانه هنا وهيكون متناسق مع الـ LTR */}
+        {/* TopNav */}
         <main className="p-8">
           <Outlet /> 
         </main>
