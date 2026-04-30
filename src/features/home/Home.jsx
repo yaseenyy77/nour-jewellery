@@ -5,60 +5,47 @@ import CategoriesGrid from './components/CategoriesGrid';
 import FeaturedProducts from './components/FeaturedProducts';
 
 const Home = () => {
-  const [appearance, setAppearance] = useState(null);
+  // This state will eventually come from your Supabase fetch
+  const [homeConfig, setHomeConfig] = useState({
+    slides: [],
+    brands: [] // This will hold your Brands, Categories, and dynamically filter products
+  });
 
   useEffect(() => {
-    // Replace this with actual Supabase fetch:
-    // const { data } = await supabase.from('appearance_settings').select('*').single();
-    // const { data: slides } = await supabase.from('hero_slides').select('*');
-    // const { data: brands } = await supabase.from('brands').select('*, brand_categories(*)');
-    
-    // Simulated dynamic fetch
-    setAppearance({
-      colors: { primary: '#000000', secondary: '#d4af37' },
+    // SIMULATED FETCH FROM SUPABASE
+    // In reality: const { data } = await supabase.from('appearance').select('*')
+    setHomeConfig({
       slides: [
-        { id: 1, desktop: '/assets/images/desktop-gold.png', mobile: '/assets/images/mobile-gold.png' },
-        { id: 2, desktop: '/assets/images/desktop-silver.png', mobile: '/assets/images/mobile-silver.png' }
+        { id: 1, desktop: '/assets/images/desk1.png', mobile: '/assets/images/mob1.png' }
       ],
       brands: [
         {
-          id: 1, name: 'KLEO',
+          id: 1,
+          name: "KLEO",
           categories: [
-            { id: 101, name: 'Necklaces', image: '/images/cat-necklaces.png' },
-            { id: 102, name: 'Rings', image: '/images/cat-rings.png' },
-          ]
-        },
-        {
-          id: 2, name: 'SIRAN',
-          categories: [
-            { id: 201, name: 'Watches', image: '/images/siran-watches.png' },
-            { id: 202, name: 'Bracelets', image: '/images/siran-bracelets.png' },
+            { name: "Necklaces", image: "/images/k-neck.png" },
+            { name: "Rings", image: "/images/k-ring.png" },
+            { name: "Bracelets", image: "/images/k-brac.png" },
+            { name: "Earrings", image: "/images/k-ear.png" },
           ]
         }
+        // If you add SIRAN in dashboard, it appears here automatically
       ]
     });
   }, []);
 
-  if (!appearance) return <div>Loading...</div>;
-
   return (
-    // Applying dynamic colors as CSS variables
-    <div 
-      className="home-container bg-white min-h-screen"
-      style={{ 
-        '--theme-primary': appearance.colors.primary, 
-        '--theme-secondary': appearance.colors.secondary 
-      }}
-    >
-      {/* 1. Dynamic Hero Slider */}
-      <HeroSlider slides={appearance.slides} />
+    <div className="bg-white min-h-screen">
+      {/* 1. Main Slider */}
+      <HeroSlider slides={homeConfig.slides} />
 
-      {/* 2. Dynamic Brands and Categories */}
-      {appearance.brands.map((brand) => (
-        <div key={brand.id} className="mb-20 mt-10">
-          
+      {/* 2. Dynamic Sections per Brand */}
+      {homeConfig.brands.map((brand) => (
+        <div key={brand.id} className="mt-12">
+          {/* Automatically adds the Category Grid for this Brand */}
           <CategoriesGrid brand={brand.name} categories={brand.categories} />
 
+          {/* Automatically adds the Product Slider filtered for this Brand */}
           <FeaturedProducts 
             title={`${brand.name} COLLECTION`} 
             brand={brand.name} 
