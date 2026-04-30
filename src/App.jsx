@@ -11,8 +11,6 @@ import Home from './features/home/Home';
 import AdminDashboard from './dashboard/AdminDashboard';
 import SettingsPage from './dashboard/features/settings/SettingsPage';
 import Appearance from './dashboard/features/settings/Appearance';
-import GeneralSettings from './dashboard/features/settings/GeneralSettings';
-import PaymentSettings from './dashboard/features/settings/PaymentSettings';
 
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
