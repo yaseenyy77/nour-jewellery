@@ -1,4 +1,3 @@
-// src/App.jsx
 import { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header/Header';
@@ -6,9 +5,6 @@ import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
 import AdminDashboard from './dashboard/AdminDashboard';
-
-// Import the new Appearance settings page
-import Appearance from './dashboard/features/settings/Appearance';
 
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
@@ -40,22 +36,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* Admin Dashboard Routes - This keeps everything inside the AdminLayout's white area */}
+        {/* مسار لوحة التحكم - يوضع أولاً لضمان الانفصال التام */}
         <Route path="/admin" element={<AdminDashboard />}>
           <Route path="overview" element={<div>Overview Page</div>} />
           <Route path="products" element={<div>Products Management</div>} />
           <Route path="orders" element={<div>Orders Page</div>} />
           <Route path="customers" element={<div>Customers Page</div>} />
           <Route path="settings" element={<div>Settings Page</div>} />
-          
-          {/* 
-            THIS WAS THE MISSING ROUTE:
-            Now when you click Appearance, it renders inside the Admin Outlet (the white space)
-          */}
-          <Route path="settings/appearance" element={<Appearance />} />
         </Route>
 
-        {/* Main Website Routes */}
+        {/* مسارات الموقع الرئيسي */}
         <Route
           path="/*"
           element={
@@ -64,7 +54,7 @@ function App() {
               <main className="pb-20">
                 <Routes>
                   <Route path="/" element={<Home />} />
-                  {/* Add other store pages like /shop here */}
+                  {/* هنا تضاف باقي صفحات المتجر مثل /shop أو /gallery */}
                 </Routes>
               </main>
               <div ref={footerRef}>
