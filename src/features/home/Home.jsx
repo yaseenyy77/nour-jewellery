@@ -5,51 +5,25 @@ import CategoriesGrid from './components/CategoriesGrid';
 import FeaturedProducts from './components/FeaturedProducts';
 
 const Home = () => {
-  // This state will eventually come from your Supabase fetch
-  const [homeConfig, setHomeConfig] = useState({
+  const [config, setConfig] = useState({
+    colors: { primary: '#000000', secondary: '#d4af37' },
     slides: [],
-    brands: [] // This will hold your Brands, Categories, and dynamically filter products
+    brands: [] 
   });
 
-  useEffect(() => {
-    // SIMULATED FETCH FROM SUPABASE
-    // In reality: const { data } = await supabase.from('appearance').select('*')
-    setHomeConfig({
-      slides: [
-        { id: 1, desktop: '/assets/images/desk1.png', mobile: '/assets/images/mob1.png' }
-      ],
-      brands: [
-        {
-          id: 1,
-          name: "KLEO",
-          categories: [
-            { name: "Necklaces", image: "/images/k-neck.png" },
-            { name: "Rings", image: "/images/k-ring.png" },
-            { name: "Bracelets", image: "/images/k-brac.png" },
-            { name: "Earrings", image: "/images/k-ear.png" },
-          ]
-        }
-        // If you add SIRAN in dashboard, it appears here automatically
-      ]
-    });
-  }, []);
-
   return (
-    <div className="bg-white min-h-screen">
-      {/* 1. Main Slider */}
-      <HeroSlider slides={homeConfig.slides} />
+    <div 
+      className="home-container bg-white min-h-screen"
+      style={{ '--main-color': config.colors.primary, '--accent-color': config.colors.secondary }}
+    >
+      {/* Original Design Hero Slider */}
+      <HeroSlider slides={config.slides} />
 
-      {/* 2. Dynamic Sections per Brand */}
-      {homeConfig.brands.map((brand) => (
-        <div key={brand.id} className="mt-12">
-          {/* Automatically adds the Category Grid for this Brand */}
+      {/* Dynamic Sections */}
+      {config.brands.map((brand) => (
+        <div key={brand.id} className="mb-20 mt-10">
           <CategoriesGrid brand={brand.name} categories={brand.categories} />
-
-          {/* Automatically adds the Product Slider filtered for this Brand */}
-          <FeaturedProducts 
-            title={`${brand.name} COLLECTION`} 
-            brand={brand.name} 
-          />
+          <FeaturedProducts title={`${brand.name} COLLECTION`} brand={brand.name} />
         </div>
       ))}
     </div>

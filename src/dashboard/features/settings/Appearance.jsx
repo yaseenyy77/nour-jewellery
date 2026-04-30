@@ -1,107 +1,93 @@
 // src/dashboard/features/settings/Appearance.jsx
 import React, { useState } from 'react';
-import { Plus, Trash2, Save, ImageIcon, Globe } from 'lucide-react';
+import { Save, Trash2, Upload, ImageIcon } from 'lucide-react';
 
 const Appearance = () => {
   const [colors, setColors] = useState({ primary: '#000000', secondary: '#d4af37' });
-  const [slides, setSlides] = useState([{ id: 1, desktop: '', mobile: '' }]);
-  
-  // Every brand will automatically have these 4 categories
-  const fixedCategoryNames = ["Necklaces", "Rings", "Bracelets", "Earrings"];
+  const [slides, setSlides] = useState([]);
+  const fixedCats = ["Necklaces", "Rings", "Bracelets", "Earrings"];
+  const [brands, setBrands] = useState([]);
 
-  const [brands, setBrands] = useState([
-    { 
-      id: 1, 
-      name: 'KLEO', 
-      // Mapping the fixed names to the brand object
-      categories: fixedCategoryNames.map(name => ({ name, image: '' }))
+  // Function to handle Image Upload (converts to local preview URL)
+  const handleImageChange = (e, callback) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => callback(reader.result);
+      reader.readAsDataURL(file);
     }
-  ]);
-
-  const addNewBrand = () => {
-    setBrands([...brands, { 
-      id: Date.now(), 
-      name: 'New Brand', 
-      categories: fixedCategoryNames.map(name => ({ name, image: '' })) 
-    }]);
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20 p-4">
-      <div className="flex justify-between items-center border-b pb-4">
-        <div>
-          <h2 className="text-2xl font-black">HOME APPEARANCE</h2>
-          <p className="text-gray-500 text-sm">Control your slides, colors, and brands</p>
-        </div>
-        <button className="bg-black text-white px-8 py-3 rounded-full font-bold flex items-center gap-2 hover:bg-gray-800 transition-all shadow-lg">
-          <Save size={20} /> SAVE SETTINGS
+    <div className="p-8 max-w-6xl mx-auto space-y-10">
+      <div className="flex justify-between items-center border-b pb-6">
+        <h2 className="text-3xl font-black italic">APPEARANCE SETTINGS</h2>
+        <button className="bg-black text-white px-10 py-3 rounded-full font-bold flex items-center gap-2 hover:scale-105 transition-transform shadow-xl">
+          <Save size={20} /> SAVE ALL CHANGES
         </button>
       </div>
 
-      {/* 1. HERO SLIDER WITH PREVIEWS */}
-      <section className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="font-bold text-lg flex items-center gap-2"><Globe size={20}/> Main Hero Slider</h3>
-          <button onClick={() => setSlides([...slides, { id: Date.now(), desktop: '', mobile: '' }])} className="text-blue-600 text-sm font-bold">+ Add Slide</button>
+      {/* 1. THEME COLORS */}
+      <section className="bg-white p-6 rounded-2xl border shadow-sm grid grid-cols-2 gap-8">
+        <div>
+          <label className="block font-bold mb-2">Primary Color (Text/Lines)</label>
+          <input type="color" value={colors.primary} onChange={e => setColors({...colors, primary: e.target.value})} className="w-full h-12 rounded-lg cursor-pointer" />
         </div>
-        <div className="grid grid-cols-1 gap-6">
-          {slides.map((slide, index) => (
-            <div key={slide.id} className="flex flex-col md:flex-row gap-6 p-4 bg-gray-50 rounded-xl border border-gray-100">
-              <div className="flex-1 space-y-4">
-                <input type="text" placeholder="Desktop Image URL" value={slide.desktop} onChange={(e) => { const s = [...slides]; s[index].desktop = e.target.value; setSlides(s); }} className="w-full p-3 border rounded-lg text-sm" />
-                <input type="text" placeholder="Mobile Image URL" value={slide.mobile} onChange={(e) => { const s = [...slides]; s[index].mobile = e.target.value; setSlides(s); }} className="w-full p-3 border rounded-lg text-sm" />
-              </div>
-              <div className="flex gap-4">
-                <div className="w-32 h-20 bg-gray-200 rounded-lg overflow-hidden border">
-                   {slide.desktop ? <img src={slide.desktop} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-[10px] text-gray-400">Desktop Preview</div>}
-                </div>
-                <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden border">
-                   {slide.mobile ? <img src={slide.mobile} className="w-full h-full object-cover" /> : <div className="flex items-center justify-center h-full text-[10px] text-gray-400">Mobile</div>}
-                </div>
-                <button onClick={() => setSlides(slides.filter(s => s.id !== slide.id))} className="text-red-500 hover:bg-red-50 p-2 rounded-lg self-center"><Trash2 size={20}/></button>
-              </div>
+        <div>
+          <label className="block font-bold mb-2">Accent Color (Gold/Hover)</label>
+          <input type="color" value={colors.secondary} onChange={e => setColors({...colors, secondary: e.target.value})} className="w-full h-12 rounded-lg cursor-pointer" />
+        </div>
+      </section>
+
+      {/* 2. HERO SLIDER (FILE UPLOAD) */}
+      <section className="bg-white p-6 rounded-2xl border shadow-sm">
+        <div className="flex justify-between mb-6">
+          <h3 className="text-xl font-bold">Main Hero Slider</h3>
+          <button onClick={() => setSlides([...slides, { id: Date.now(), desktop: '', mobile: '' }])} className="text-sm font-bold underline">+ Add New Slide</button>
+        </div>
+        <div className="space-y-4">
+          {slides.map((slide, idx) => (
+            <div key={slide.id} className="p-4 bg-gray-50 rounded-xl border flex gap-6 items-center">
+               <div className="flex-1 grid grid-cols-2 gap-4">
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-2 cursor-pointer hover:bg-gray-100">
+                    <span className="text-[10px] font-bold">DESKTOP IMAGE (PNG/JPG)</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageChange(e, (img) => {const s = [...slides]; s[idx].desktop = img; setSlides(s);})} />
+                    {slide.desktop && <img src={slide.desktop} className="h-12 mt-2" />}
+                  </label>
+                  <label className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-2 cursor-pointer hover:bg-gray-100">
+                    <span className="text-[10px] font-bold">MOBILE IMAGE (PNG/JPG)</span>
+                    <input type="file" accept="image/*" className="hidden" onChange={e => handleImageChange(e, (img) => {const s = [...slides]; s[idx].mobile = img; setSlides(s);})} />
+                    {slide.mobile && <img src={slide.mobile} className="h-12 mt-2" />}
+                  </label>
+               </div>
+               <button onClick={() => setSlides(slides.filter(s => s.id !== slide.id))} className="text-red-500"><Trash2 size={20}/></button>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 2. DYNAMIC BRANDS SECTION */}
+      {/* 3. BRANDS & CATEGORIES */}
       <section className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h3 className="font-black text-xl">BRANDS SECTIONS</h3>
-          <button onClick={addNewBrand} className="bg-white border-2 border-black text-black px-4 py-2 rounded-lg font-bold hover:bg-black hover:text-white transition-all">+ Add New Brand</button>
-        </div>
+        <button onClick={() => setBrands([...brands, { id: Date.now(), name: 'NEW BRAND', categories: fixedCats.map(n => ({name: n, image: ''})) }])} className="w-full py-4 border-2 border-black font-black hover:bg-black hover:text-white transition-all">
+          + ADD BRAND SECTION
+        </button>
 
-        {brands.map((brand, bIndex) => (
-          <div key={brand.id} className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
-            <div className="bg-gray-50 p-4 border-b flex justify-between items-center">
-              <input 
-                className="bg-transparent font-black text-lg border-none focus:ring-0 w-1/2" 
-                value={brand.name} 
-                onChange={(e) => { const b = [...brands]; b[bIndex].name = e.target.value; setBrands(b); }}
-              />
-              <button onClick={() => setBrands(brands.filter(b => b.id !== brand.id))} className="text-red-500 flex items-center gap-1 text-sm font-bold"><Trash2 size={16}/> Delete Brand Section</button>
+        {brands.map((brand, bIdx) => (
+          <div key={brand.id} className="bg-white border rounded-2xl overflow-hidden">
+            <div className="p-4 bg-black text-white flex justify-between">
+              <input value={brand.name} onChange={e => {const b = [...brands]; b[bIdx].name = e.target.value; setBrands(b);}} className="bg-transparent border-none font-bold text-lg focus:ring-0" />
+              <button onClick={() => setBrands(brands.filter(b => b.id !== brand.id))}><Trash2 size={18}/></button>
             </div>
-            
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {brand.categories.map((cat, cIndex) => (
-                <div key={cIndex} className="space-y-3">
-                  <p className="font-bold text-xs uppercase tracking-widest text-gray-400">{cat.name}</p>
-                  <div className="aspect-square w-full bg-gray-100 rounded-lg overflow-hidden border mb-2 flex items-center justify-center">
-                    {cat.image ? <img src={cat.image} className="w-full h-full object-cover" /> : <ImageIcon className="text-gray-300" size={32}/>}
+            <div className="p-6 grid grid-cols-4 gap-4">
+              {brand.categories.map((cat, cIdx) => (
+                <label key={cIdx} className="flex flex-col items-center gap-2 cursor-pointer group">
+                  <div className="w-full aspect-square bg-gray-100 rounded-lg border-2 border-dashed flex items-center justify-center overflow-hidden">
+                    {cat.image ? <img src={cat.image} className="w-full h-full object-cover" /> : <ImageIcon className="text-gray-300" />}
                   </div>
-                  <input 
-                    type="text" 
-                    placeholder="Image URL" 
-                    value={cat.image} 
-                    onChange={(e) => { const b = [...brands]; b[bIndex].categories[cIndex].image = e.target.value; setBrands(b); }}
-                    className="w-full p-2 border rounded text-xs"
-                  />
-                </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest">{cat.name}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={e => handleImageChange(e, (img) => {const b = [...brands]; b[bIdx].categories[cIdx].image = img; setBrands(b);})} />
+                </label>
               ))}
-            </div>
-            <div className="px-6 pb-6 italic text-xs text-blue-500">
-              * A product slider for "{brand.name}" will be automatically generated on the Home page.
             </div>
           </div>
         ))}
