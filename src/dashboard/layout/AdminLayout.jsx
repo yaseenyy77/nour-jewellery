@@ -4,12 +4,14 @@ import Sidebar from './Sidebar';
 
 const AdminLayout = () => {
   return (
-    /* ضفنا dir="ltr" هنا بشكل صريح عشان نفرض الاتجاه من الشمال لليمين على لوحة التحكم بالكامل */
     <div className="flex bg-[#fcfcfc] min-h-screen" dir="ltr">
+      {/* السايد بار الثابت على الشمال */}
       <Sidebar />
+      
       <div className="flex-1 flex flex-col">
-        {/* TopNav */}
+        {/* main هي المنطقة الفاضية اللي كنت معلم عليها */}
         <main className="p-8">
+          {/* الـ Outlet هو اللي بيعرض (Overview, Settings, Appearance) بناءً على الرابط */}
           <Outlet /> 
         </main>
       </div>
