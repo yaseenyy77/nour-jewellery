@@ -1,3 +1,4 @@
+// src/features/home/components/HeroSlider.jsx
 import React, { useRef } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
@@ -7,14 +8,10 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// استيراد الصور
-import goldImg from '../../../assets/images/دهب.png';
-import silverImg from '../../../assets/images/فضة.png';
-import luxuryImg from '../../../assets/images/غالي.png';
-
-const HeroSlider = () => {
+const HeroSlider = ({ slides = [] }) => {
   const swiperRef = useRef(null);
-  const slides = [goldImg, silverImg, luxuryImg];
+
+  if (slides.length === 0) return null;
 
   return (
     <section className="relative w-full group overflow-hidden bg-gray-50">
@@ -27,42 +24,47 @@ const HeroSlider = () => {
           swiperRef.current = swiper;
         }}
         pagination={{ clickable: true }}
-        className="w-full h-[400px] md:h-[500px]" 
+        className="w-full h-[50vh] md:h-[80vh]" 
       >
-        {slides.map((img, index) => (
-          <SwiperSlide key={index}>
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.id}>
             <div className="w-full h-full">
-              <img 
-                src={img} 
-                className="w-full h-full object-cover object-center" 
-                alt={`slide-${index}`} 
-              />
+              <picture>
+                {/* Desktop Image */}
+                <source media="(min-width: 768px)" srcSet={slide.desktop} />
+                {/* Mobile Image (Fallback) */}
+                <img 
+                  src={slide.mobile} 
+                  className="w-full h-full object-cover object-center" 
+                  alt={`Slide ${slide.id}`} 
+                />
+              </picture>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
 
-      {/* الأسهم المخصصة */}
       <button 
         onClick={() => swiperRef.current?.slidePrev()}
-        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm"
+        className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm"
+        style={{ color: 'var(--theme-primary)' }}
       >
         <ChevronLeft size={28} />
       </button>
 
       <button 
         onClick={() => swiperRef.current?.slideNext()}
-        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm"
+        className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm"
+        style={{ color: 'var(--theme-primary)' }}
       >
         <ChevronRight size={28} />
       </button>
 
       <style jsx global>{`
-        /* تنسيق النقاط (Pagination) */
         .swiper-pagination-bullet {
           width: 8px;
           height: 8px;
-          background: #000 !important;
+          background: var(--theme-primary) !important;
           opacity: 0.2;
           transition: all 0.3s ease;
         }
@@ -70,7 +72,7 @@ const HeroSlider = () => {
           width: 24px;
           border-radius: 4px;
           opacity: 0.8;
-          background: #d4af37 !important; /* اللون الذهبي */
+          background: var(--theme-secondary) !important; 
         }
       `}</style>
     </section>
