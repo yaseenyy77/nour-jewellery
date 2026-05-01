@@ -5,7 +5,7 @@ import TopNav from './TopNav';
 import { 
   BarChart3, LineChart, Table, PlusCircle, Tags, 
   ListOrdered, FileText, Truck, Users, Shield, 
-  Settings2, CreditCard, Palette 
+  Settings2, CreditCard, Palette, ChevronRight
 } from 'lucide-react';
 
 const dashboardStructure = {
@@ -40,16 +40,16 @@ const AdminLayout = () => {
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col" dir="ltr">
+    <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-sans" dir="ltr">
       {/* استدعاء التوب ناف وإرسال حالة السايد بار */}
       <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       
-      <div className="flex flex-1">
+      <div className="flex flex-1 relative">
         {/* السايد بار */}
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
         {/* المحتوى الرئيسي */}
-        <main className="flex-1 p-6 md:p-12">
+        <main className="flex-1 p-6 md:p-12 transition-all">
           {currentCategory ? (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
               <div className="mb-12">
@@ -59,20 +59,31 @@ const AdminLayout = () => {
                 </h2>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {/* شبكة الكروت التفاعلية والذكية */}
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {currentCategory.files.map((file, index) => (
                   <Link
                     key={index}
                     to={file.path}
-                    className="group relative aspect-square flex flex-col items-center justify-center bg-white border-2 border-black/5 rounded-3xl transition-all duration-500 hover:bg-black hover:scale-105 hover:shadow-xl active:scale-95 overflow-hidden"
+                    className="group relative flex flex-row items-center gap-5 p-7 w-full border border-gray-100 rounded-3xl transition-all duration-300 hover:border-black hover:bg-black active:scale-95 shadow-sm md:aspect-square md:flex-col md:items-center md:justify-center md:p-10 md:rounded-3xl md:overflow-hidden md:shadow-none animate-in fade-in-up duration-500 delay-[20ms]"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="relative z-10 mb-4 text-black group-hover:text-white transition-all duration-500 group-hover:rotate-[360deg]">
+                    {/* خلفية مخفية بتظهر في الهوفر للديسكتاب */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity duration-500 md:block hidden z-0"></div>
+                    
+                    {/* الأيقونة */}
+                    <div className="relative z-10 text-black group-hover:text-white transition-all duration-500 group-hover:rotate-[360deg] md:mb-4">
                       {React.cloneElement(file.icon, { size: 38, strokeWidth: 1.5 })}
                     </div>
-                    <span className="relative z-10 text-[11px] font-black tracking-[0.2em] text-gray-400 group-hover:text-white text-center">
-                      {file.name}
-                    </span>
+                    
+                    {/* النص */}
+                    <div className="flex-1 md:flex-none">
+                        <span className="relative z-10 text-lg font-bold text-gray-800 transition-colors duration-500 md:text-[11px] md:font-black md:tracking-[0.2em] md:text-gray-400 group-hover:text-white text-left md:text-center">
+                          {file.name}
+                        </span>
+                    </div>
+
+                    {/* سهم الموبايل الصغير (مخفي في الديسكتاب) */}
+                    <ChevronRight size={24} className="text-gray-400 group-hover:text-white transition-colors duration-500 md:hidden" />
                   </Link>
                 ))}
               </div>

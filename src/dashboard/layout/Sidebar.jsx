@@ -1,7 +1,12 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut 
+  LayoutDashboard, 
+  Package, 
+  ShoppingBag, 
+  Users, 
+  Settings, 
+  LogOut 
 } from 'lucide-react';
 
 const menuItems = [
@@ -51,7 +56,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
         {/* Logout Section */}
         <div className="p-4 border-t border-gray-50">
-          <button className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all">
+          <button className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all hover:bg-red-50 rounded-lg">
             <LogOut size={20} />
             Log Out
           </button>
