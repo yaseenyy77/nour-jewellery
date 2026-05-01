@@ -8,7 +8,6 @@ import {
   Settings2, CreditCard, Palette
 } from 'lucide-react';
 
-// هيكل الداش بورد: المفتاح هو المسار الرئيسي، والقيمة هي العناوين والأزرار الفرعية
 const dashboardStructure = {
   '/admin/overview': { title: 'DASHBOARD', files: [
     { name: 'STATS', icon: <BarChart3 />, path: '/admin/overview/stats' },
@@ -31,7 +30,7 @@ const dashboardStructure = {
   '/admin/settings': { title: 'CONFIG', files: [
     { name: 'BASE', icon: <Settings2 />, path: '/admin/settings/general' },
     { name: 'PAY', icon: <CreditCard />, path: '/admin/settings/payment' },
-    { name: 'UI', icon: <Palette />, path: '/admin/settings/appearance' }, // الزرار ده مربوط بمسار الأبيرنس
+    { name: 'UI', icon: <Palette />, path: '/admin/settings/appearance' },
   ]}
 };
 
@@ -39,21 +38,18 @@ const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
   
-  // التحقق إذا كان المسار الحالي هو مجلد رئيسي يعرض أيقونات أم صفحة داخلية
+  // تأمين الكود: لو المسار مش في الأوبجكت ميرميش Error
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-sans" dir="ltr">
-      {/* شريط التنقل العلوي */}
       <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       
       <div className="flex flex-1 overflow-hidden">
-        {/* القائمة الجانبية */}
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
         <main className="flex-1 p-4 md:p-12 overflow-y-auto transition-all">
           {currentCategory ? (
-            /* لو إحنا في المسار الرئيسي زي /admin/settings، اعرض الأيقونات */
             <div className="animate-in fade-in zoom-in-95 duration-500">
               <div className="mb-8">
                 <h2 className="text-xl md:text-3xl font-black tracking-tight text-black flex items-center gap-3">
@@ -85,10 +81,7 @@ const AdminLayout = () => {
               </div>
             </div>
           ) : (
-            /* لو دخلت جوا مسار فرعي زي /admin/settings/appearance، اعرض الصفحة بجانب السايد بار */
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-               <Outlet />
-            </div>
+            <Outlet />
           )}
         </main>
       </div>
