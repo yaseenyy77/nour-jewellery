@@ -30,9 +30,9 @@ const Sidebar = () => {
             key={item.name}
             to={item.path}
             className={({ isActive }) => `
-              flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all
+              flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-300
               ${isActive 
-                ? 'bg-black text-white shadow-lg' 
+                ? 'bg-black text-white shadow-xl translate-x-2' 
                 : 'text-gray-500 hover:bg-gray-50 hover:text-black'}
             `}
           >

@@ -9,41 +9,41 @@ import {
 
 const dashboardStructure = {
   '/admin/overview': {
-    title: 'Overview',
+    title: 'OVERVIEW DASHBOARD',
     files: [
-      { name: 'Stats Cards', icon: <BarChart3 />, path: '/admin/overview/stats' },
-      { name: 'Sales Chart', icon: <LineChart />, path: '/admin/overview/charts' },
+      { name: 'STATS CARDS', icon: <BarChart3 />, path: '/admin/overview/stats' },
+      { name: 'SALES CHART', icon: <LineChart />, path: '/admin/overview/charts' },
     ]
   },
   '/admin/products': {
-    title: 'Products',
+    title: 'PRODUCTS CONTROL',
     files: [
-      { name: 'Product Table', icon: <Table />, path: '/admin/products/table' },
-      { name: 'Add Product', icon: <PlusCircle />, path: '/admin/products/add' },
-      { name: 'Category Manager', icon: <Tags />, path: '/admin/products/categories' },
+      { name: 'PRODUCT TABLE', icon: <Table />, path: '/admin/products/table' },
+      { name: 'ADD PRODUCT', icon: <PlusCircle />, path: '/admin/products/add' },
+      { name: 'CATEGORIES', icon: <Tags />, path: '/admin/products/categories' },
     ]
   },
   '/admin/orders': {
-    title: 'Orders',
+    title: 'ORDERS MANAGEMENT',
     files: [
-      { name: 'Order List', icon: <ListOrdered />, path: '/admin/orders/list' },
-      { name: 'Order Details', icon: <FileText />, path: '/admin/orders/details' },
-      { name: 'Shipping Status', icon: <Truck />, path: '/admin/orders/shipping' },
+      { name: 'ORDER LIST', icon: <ListOrdered />, path: '/admin/orders/list' },
+      { name: 'ORDER DETAILS', icon: <FileText />, path: '/admin/orders/details' },
+      { name: 'SHIPPING', icon: <Truck />, path: '/admin/orders/shipping' },
     ]
   },
   '/admin/customers': {
-    title: 'Customers',
+    title: 'CUSTOMERS HUB',
     files: [
-      { name: 'Customers List', icon: <Users />, path: '/admin/customers/list' },
-      { name: 'Admin Roles', icon: <Shield />, path: '/admin/customers/roles' },
+      { name: 'CUSTOMERS LIST', icon: <Users />, path: '/admin/customers/list' },
+      { name: 'ADMIN ROLES', icon: <Shield />, path: '/admin/customers/roles' },
     ]
   },
   '/admin/settings': {
-    title: 'Settings',
+    title: 'SYSTEM SETTINGS',
     files: [
-      { name: 'General Settings', icon: <Settings2 />, path: '/admin/settings/general' },
-      { name: 'Payment Settings', icon: <CreditCard />, path: '/admin/settings/payment' },
-      { name: 'Appearance', icon: <Palette />, path: '/admin/settings/appearance' },
+      { name: 'GENERAL', icon: <Settings2 />, path: '/admin/settings/general' },
+      { name: 'PAYMENTS', icon: <CreditCard />, path: '/admin/settings/payment' },
+      { name: 'APPEARANCE', icon: <Palette />, path: '/admin/settings/appearance' },
     ]
   }
 };
@@ -53,29 +53,43 @@ const AdminLayout = () => {
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
-    <div className="flex bg-[#fcfcfc] min-h-screen" dir="ltr">
+    <div className="flex bg-[#fcfcfc] min-h-screen font-sans" dir="ltr">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <main className="p-10">
+        <main className="p-6 md:p-12">
           {currentCategory ? (
-            <div className="max-w-4xl">
-              <h2 className="text-xl font-bold mb-8 text-black border-l-4 border-black pl-4">
-                {currentCategory.title}
-              </h2>
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+              {/* عنوان الصفحة بشكل فخم */}
+              <div className="mb-12">
+                <h2 className="text-3xl font-black tracking-tighter text-black flex items-center gap-3">
+                  <span className="w-12 h-[2px] bg-black"></span>
+                  {currentCategory.title}
+                </h2>
+              </div>
               
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+              {/* شبكة المربعات Responsive & Perfect Square */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {currentCategory.files.map((file, index) => (
                   <Link
                     key={index}
                     to={file.path}
-                    className="group flex flex-col items-center justify-center p-6 bg-white border border-gray-100 rounded-xl transition-all duration-200 hover:bg-black hover:border-black shadow-sm hover:shadow-md"
+                    className="group relative aspect-square flex flex-col items-center justify-center bg-white border-2 border-black/5 rounded-3xl transition-all duration-500 hover:bg-black hover:scale-105 hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] active:scale-95 overflow-hidden"
                   >
-                    <div className="mb-3 text-black group-hover:text-white transition-colors duration-200">
-                      {React.cloneElement(file.icon, { size: 24 })}
+                    {/* خلفية مخفية بتظهر في الهوفر */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-gray-800 to-black opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    {/* الأيقونة */}
+                    <div className="relative z-10 mb-4 text-black group-hover:text-white transition-all duration-500 group-hover:rotate-[360deg]">
+                      {React.cloneElement(file.icon, { size: 38, strokeWidth: 1.5 })}
                     </div>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-white text-center transition-colors duration-200">
+                    
+                    {/* النص "الشعبولي" الشيك */}
+                    <span className="relative z-10 text-[11px] font-black tracking-[0.2em] text-gray-400 group-hover:text-white text-center transition-colors duration-500">
                       {file.name}
                     </span>
+
+                    {/* حركة الديكور الصغيرة في الركن */}
+                    <div className="absolute top-4 right-4 w-2 h-2 bg-black rounded-full group-hover:bg-white transition-colors"></div>
                   </Link>
                 ))}
               </div>
