@@ -4,7 +4,10 @@ import Header from './components/layout/Header/Header';
 import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
-import AdminDashboard from './dashboard/AdminDashboard';
+
+// استيراد مكونات لوحة التحكم
+import AdminLayout from './dashboard/layout/AdminLayout'; // تأكد من المسار الصحيح للـ Layout
+import Appearance from './dashboard/features/settings/Appearance'; // استيراد صفحة الأبيرنس
 
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
@@ -36,13 +39,27 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* مسار لوحة التحكم - يوضع أولاً لضمان الانفصال التام */}
-        <Route path="/admin" element={<AdminDashboard />}>
-          <Route path="overview" element={<div>Overview Page</div>} />
-          <Route path="products" element={<div>Products Management</div>} />
-          <Route path="orders" element={<div>Orders Page</div>} />
-          <Route path="customers" element={<div>Customers Page</div>} />
-          <Route path="settings" element={<div>Settings Page</div>} />
+        {/* مسار لوحة التحكم - تم استخدام AdminLayout لتفعيل نظام الـ Grid والـ Outlet */}
+        <Route path="/admin" element={<AdminLayout />}>
+          {/* الإحصائيات */}
+          <Route path="overview" element={<div>Overview Grid (Click a file)</div>} />
+          <Route path="overview/stats" element={<div>Stats Page Content</div>} />
+          
+          {/* المنتجات */}
+          <Route path="products" element={<div>Inventory Grid</div>} />
+          <Route path="products/table" element={<div>Products Table Page</div>} />
+          
+          {/* الطلبات */}
+          <Route path="orders" element={<div>Orders Grid</div>} />
+          
+          {/* العملاء */}
+          <Route path="customers" element={<div>Clients Grid</div>} />
+          
+          {/* الإعدادات والربط المطلوب */}
+          <Route path="settings" element={<div>Settings Grid</div>} />
+          <Route path="settings/appearance" element={<Appearance />} /> {/* الربط هنا */}
+          <Route path="settings/general" element={<div>General Settings Page</div>} />
+          <Route path="settings/payment" element={<div>Payment Settings Page</div>} />
         </Route>
 
         {/* مسارات الموقع الرئيسي */}
