@@ -37,47 +37,43 @@ const dashboardStructure = {
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  
+  // تأمين الكود: لو المسار مش في الأوبجكت ميرميش Error
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-sans selection:bg-black selection:text-white" dir="ltr">
-      {/* التوب ناف تحت السايد بار في الترتيب الرأسي */}
+    <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-sans" dir="ltr">
       <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
       
-      <div className="flex flex-1">
-        {/* السايد بار واخد z-50 عشان يغطي على التوب ناف */}
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
         
-        <main className="flex-1 p-4 md:p-12 transition-all">
+        <main className="flex-1 p-4 md:p-12 overflow-y-auto transition-all">
           {currentCategory ? (
             <div className="animate-in fade-in zoom-in-95 duration-500">
-              {/* عنوان مسمسم */}
-              <div className="mb-8 md:mb-14">
+              <div className="mb-8">
                 <h2 className="text-xl md:text-3xl font-black tracking-tight text-black flex items-center gap-3">
-                  <span className="w-10 h-[3px] bg-black"></span>
-                  <span className="uppercase tracking-tighter">{currentCategory.title}</span>
+                  <span className="w-8 md:w-12 h-[2.5px] bg-black"></span>
+                  <span className="uppercase">{currentCategory.title}</span>
                 </h2>
               </div>
               
-              {/* شبكة صغنونة: 3 في الصف للموبايل لتقليل الحجم */}
-              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-8">
+              <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-8">
                 {currentCategory.files.map((file, index) => (
                   <Link
                     key={index}
                     to={file.path}
-                    className="group relative aspect-square flex flex-col items-center justify-center bg-white border border-gray-100 rounded-xl md:rounded-[2rem] transition-all duration-500 hover:bg-black hover:scale-105 active:scale-90 shadow-sm hover:shadow-2xl overflow-hidden"
+                    className="group relative aspect-square flex flex-col items-center justify-center bg-white border border-gray-100 rounded-2xl md:rounded-[2rem] transition-all duration-500 hover:bg-black hover:scale-105 active:scale-95 shadow-sm hover:shadow-xl overflow-hidden"
                   >
-                    {/* انيميشن اللف رجع يا وحش */}
-                    <div className="relative z-10 text-black group-hover:text-white transition-all duration-700 ease-in-out group-hover:rotate-[360deg] mb-1 md:mb-4">
+                    <div className="relative z-10 text-black group-hover:text-white transition-all duration-700 group-hover:rotate-[360deg] mb-1 md:mb-4">
                       {React.cloneElement(file.icon, { 
-                        size: 22, // حجم أصغر للموبايل
-                        className: "md:w-10 md:h-10", // حجم أكبر للديسكتاب
+                        size: 20,
+                        className: "md:w-8 md:h-8",
                         strokeWidth: 1.5 
                       })}
                     </div>
                     
-                    {/* نص مسمسم جداً */}
-                    <span className="relative z-10 text-[7px] md:text-[11px] font-black tracking-[0.15em] text-gray-400 group-hover:text-white text-center uppercase px-1">
+                    <span className="relative z-10 text-[7px] md:text-[10px] font-black tracking-widest text-gray-400 group-hover:text-white text-center uppercase">
                       {file.name}
                     </span>
                   </Link>

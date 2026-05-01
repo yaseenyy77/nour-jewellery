@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut 
+  LayoutDashboard, Package, ShoppingBag, Users, Settings, LogOut, X 
 } from 'lucide-react';
 
 const menuItems = [
@@ -15,24 +15,21 @@ const menuItems = [
 const Sidebar = ({ isOpen, setIsOpen }) => {
   return (
     <>
-      {/* الـ Overlay بقى فوق التوب ناف برضه */}
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[45] lg:hidden"
           onClick={() => setIsOpen(false)}
         ></div>
       )}
 
-      {/* السايد بار واخد z-50 عشان يغطي على أي حاجة */}
       <aside className={`
         fixed lg:sticky top-0 left-0 z-50
         w-64 h-screen bg-white border-r border-gray-100 flex flex-col
-        transition-transform duration-500 cubic-bezier(0.4, 0, 0.2, 1)
-        ${isOpen ? 'translate-x-0 shadow-[20px_0_60px_-15px_rgba(0,0,0,0.3)]' : '-translate-x-full lg:translate-x-0'}
+        transition-transform duration-500 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
       `}>
-        {/* هيدر صغير جوه السايد بار للموبايل عشان زرار القفل */}
-        <div className="p-6 border-b border-gray-50 lg:hidden flex justify-between items-center">
-          <span className="font-black italic">MENU</span>
+        <div className="p-5 border-b border-gray-50 lg:hidden flex justify-between items-center">
+          <span className="font-black italic text-sm">NAVIGATION</span>
           <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-50 rounded-full">
             <X size={18} />
           </button>
@@ -45,9 +42,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               to={item.path}
               onClick={() => setIsOpen(false)}
               className={({ isActive }) => `
-                flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all duration-300
+                flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black transition-all
                 ${isActive 
-                  ? 'bg-black text-white shadow-lg translate-x-2' 
+                  ? 'bg-black text-white shadow-lg' 
                   : 'text-gray-400 hover:bg-gray-50 hover:text-black'}
               `}
             >
