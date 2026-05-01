@@ -20,12 +20,10 @@ const menuItems = [
 const Sidebar = () => {
   return (
     <aside className="w-64 h-screen bg-white border-r border-gray-100 flex flex-col sticky top-0">
-      {/* Logo Section */}
       <div className="p-8 border-b border-gray-50">
         <h1 className="text-2xl font-black tracking-tighter italic">NOUR ADMIN</h1>
       </div>
 
-      {/* Navigation Links */}
       <nav className="flex-1 p-4 space-y-2 mt-4">
         {menuItems.map((item) => (
           <NavLink
@@ -44,7 +42,6 @@ const Sidebar = () => {
         ))}
       </nav>
 
-      {/* Logout Section */}
       <div className="p-4 border-t border-gray-50">
         <button className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg transition-all">
           <LogOut size={20} />

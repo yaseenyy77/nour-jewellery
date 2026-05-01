@@ -7,17 +7,16 @@ import {
   Settings2, CreditCard, Palette 
 } from 'lucide-react';
 
-// تعريف هيكل الملفات لكل قسم بناءً على الملف اللي بعته
 const dashboardStructure = {
   '/admin/overview': {
-    title: 'Overview Analytics',
+    title: 'Overview',
     files: [
       { name: 'Stats Cards', icon: <BarChart3 />, path: '/admin/overview/stats' },
       { name: 'Sales Chart', icon: <LineChart />, path: '/admin/overview/charts' },
     ]
   },
   '/admin/products': {
-    title: 'Product Management',
+    title: 'Products',
     files: [
       { name: 'Product Table', icon: <Table />, path: '/admin/products/table' },
       { name: 'Add Product', icon: <PlusCircle />, path: '/admin/products/add' },
@@ -25,7 +24,7 @@ const dashboardStructure = {
     ]
   },
   '/admin/orders': {
-    title: 'Order Management',
+    title: 'Orders',
     files: [
       { name: 'Order List', icon: <ListOrdered />, path: '/admin/orders/list' },
       { name: 'Order Details', icon: <FileText />, path: '/admin/orders/details' },
@@ -33,14 +32,14 @@ const dashboardStructure = {
     ]
   },
   '/admin/customers': {
-    title: 'User Management',
+    title: 'Customers',
     files: [
       { name: 'Customers List', icon: <Users />, path: '/admin/customers/list' },
       { name: 'Admin Roles', icon: <Shield />, path: '/admin/customers/roles' },
     ]
   },
   '/admin/settings': {
-    title: 'Settings Page',
+    title: 'Settings',
     files: [
       { name: 'General Settings', icon: <Settings2 />, path: '/admin/settings/general' },
       { name: 'Payment Settings', icon: <CreditCard />, path: '/admin/settings/payment' },
@@ -51,30 +50,30 @@ const dashboardStructure = {
 
 const AdminLayout = () => {
   const location = useLocation();
-  
-  // التحقق إذا كان المسار الحالي هو أحد الأقسام الرئيسية لعرض الأزرار المربعة
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
     <div className="flex bg-[#fcfcfc] min-h-screen" dir="ltr">
       <Sidebar />
       <div className="flex-1 flex flex-col">
-        <main className="p-8">
-          {/* لو إحنا في صفحة رئيسية (زي Settings)، اعرض الأزرار المربعة */}
+        <main className="p-10">
           {currentCategory ? (
-            <div>
-              <h2 className="text-2xl font-bold mb-8 text-gray-800">{currentCategory.title}</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            <div className="max-w-4xl">
+              <h2 className="text-xl font-bold mb-8 text-black border-l-4 border-black pl-4">
+                {currentCategory.title}
+              </h2>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {currentCategory.files.map((file, index) => (
                   <Link
                     key={index}
                     to={file.path}
-                    className="group flex flex-col items-center justify-center p-10 bg-white border-2 border-gray-100 rounded-2xl transition-all duration-300 hover:border-black hover:shadow-xl hover:-translate-y-1"
+                    className="group flex flex-col items-center justify-center p-6 bg-white border border-gray-100 rounded-xl transition-all duration-200 hover:bg-black hover:border-black shadow-sm hover:shadow-md"
                   >
-                    <div className="mb-4 p-4 bg-gray-50 rounded-xl group-hover:bg-black group-hover:text-white transition-colors duration-300">
-                      {React.cloneElement(file.icon, { size: 32 })}
+                    <div className="mb-3 text-black group-hover:text-white transition-colors duration-200">
+                      {React.cloneElement(file.icon, { size: 24 })}
                     </div>
-                    <span className="text-sm font-bold text-gray-600 group-hover:text-black">
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-gray-500 group-hover:text-white text-center transition-colors duration-200">
                       {file.name}
                     </span>
                   </Link>
@@ -82,7 +81,6 @@ const AdminLayout = () => {
               </div>
             </div>
           ) : (
-            /* لو ضغطت على زرار من المربعات، يعرض محتوى الملف (الـ Outlet) */
             <Outlet />
           )}
         </main>
