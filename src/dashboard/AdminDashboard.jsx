@@ -3,7 +3,7 @@ import AdminLayout from './layout/AdminLayout';
 
 const AdminDashboard = () => {
   return (
-    // AdminLayout جواه السايد بار والمنطقة اللي هيتعرض فيها الصفحات
+    /* AdminLayout جواه التوب ناف، السايد بار، ومنطقة عرض المربعات أو الصفحات */
     <AdminLayout />
   );
 };
