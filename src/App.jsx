@@ -6,9 +6,6 @@ import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
 import AdminDashboard from './dashboard/AdminDashboard';
 
-// استيراد صفحة الإعدادات التي قمت بإنشائها
-import SettingsPage from './dashboard/SettingsPage'; // تأكد أن المسار صحيح حسب ترتيب ملفاتك
-
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const footerRef = useRef(null);
@@ -39,23 +36,16 @@ function App() {
   return (
     <Router>
       <Routes>
-        {/* مسار لوحة التحكم - Admin Panel */}
+        {/* مسار لوحة التحكم - يوضع أولاً لضمان الانفصال التام */}
         <Route path="/admin" element={<AdminDashboard />}>
           <Route path="overview" element={<div>Overview Page</div>} />
           <Route path="products" element={<div>Products Management</div>} />
           <Route path="orders" element={<div>Orders Page</div>} />
           <Route path="customers" element={<div>Customers Page</div>} />
-          
-          {/* هنا قمنا بربط مسار الإعدادات بالصفحة التي صممتها SettingsPage */}
-          <Route path="settings" element={<SettingsPage />} />
-          
-          {/* اختياري: إذا أردت إضافة مسارات فرعية داخل الإعدادات مستقبلاً */}
-          <Route path="settings/appearance" element={<div>Appearance Settings</div>} />
-          <Route path="settings/general" element={<div>General Settings</div>} />
-          <Route path="settings/payment" element={<div>Payment Settings</div>} />
+          <Route path="settings" element={<div>Settings Page</div>} />
         </Route>
 
-        {/* مسارات الموقع الرئيسي - Front-end */}
+        {/* مسارات الموقع الرئيسي */}
         <Route
           path="/*"
           element={
@@ -64,6 +54,7 @@ function App() {
               <main className="pb-20">
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  {/* هنا تضاف باقي صفحات المتجر مثل /shop أو /gallery */}
                 </Routes>
               </main>
               <div ref={footerRef}>
