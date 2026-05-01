@@ -3,23 +3,19 @@ import { Menu, X } from 'lucide-react';
 
 const TopNav = ({ isSidebarOpen, setIsSidebarOpen }) => {
   return (
-    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-6 sticky top-0 z-50">
-      <div className="flex items-center gap-4">
-        {/* زر الهمبرجر يظهر فقط في الموبايل */}
+    <header className="h-14 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-4 sticky top-0 z-50">
+      <div className="flex items-center gap-3">
         <button 
           onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-          className="p-2 hover:bg-gray-50 rounded-lg lg:hidden transition-colors"
+          className="p-1.5 hover:bg-gray-100 rounded-md lg:hidden transition-colors"
         >
-          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
         </button>
-        
-        {/* اللوجو اتنقل هنا */}
-        <h1 className="text-xl font-black tracking-tighter italic">NOUR ADMIN</h1>
+        <h1 className="text-lg font-black tracking-tighter italic">NOUR ADMIN</h1>
       </div>
 
-      {/* حتة زيادة لو عايز تحط بروفايل أو إشعارات مستقبلاً */}
-      <div className="flex items-center gap-4 text-sm font-bold text-gray-400">
-        ADMIN PANEL v1.0
+      <div className="hidden sm:block text-[10px] font-bold text-gray-300 tracking-[0.2em]">
+        PANEL v1.0
       </div>
     </header>
   );
