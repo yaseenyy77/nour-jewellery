@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
-// تأكد إن مسار ملف سوبابيس صح بناءً على هيكل مشروعك
-import { supabase } from '../../../services/supabaseClient'; 
+import { supabase } from '../../../../../supabaseClient'; // تم ضبط المسار للمجلد الرئيسي بدقة بالخروج 5 خطوات لورا
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
-  const [isUploading, setIsUploading] = useState(false); // حالة اللودينج أثناء الرفع
+  const [isUploading, setIsUploading] = useState(false);
 
-  // اختيار وتجهيز صور الديسكتوب
   const handleDesktopChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files.map(file => ({
@@ -19,7 +17,6 @@ const Appearance = () => {
     e.target.value = null; 
   };
 
-  // اختيار وتجهيز صور الموبايل
   const handleMobileChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files.map(file => ({
@@ -31,47 +28,43 @@ const Appearance = () => {
     e.target.value = null; 
   };
 
-  // حذف صورة ديسكتوب قبل الرفع
   const removeDesktopImage = (id) => {
     setDesktopImages(prev => prev.filter(img => img.id !== id));
   };
 
-  // حذف صورة موبايل قبل الرفع
   const removeMobileImage = (id) => {
     setMobileImages(prev => prev.filter(img => img.id !== id));
   };
 
-  // دالة الإرسال للسيرفر (سوبابيس)
   const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (desktopImages.length === 0 && mobileImages.length === 0) {
-      alert("Please select at least one image to upload.");
+      alert("From فضلك اختر صورة واحدة على الأقل!");
       return;
     }
 
     setIsUploading(true);
 
     try {
-      // دالة داخلية مسؤولة عن رفع صورة واحدة للباكت وتخزينها في الجدول
       const uploadAndSaveImage = async (imageFile, deviceType) => {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${deviceType}/${fileName}`; // بنقسمهم فولدرات وهمية
+        const filePath = `${deviceType}/${fileName}`;
 
-        // 1. رفع الصورة للباكت
+        // 1. الرفع للـ Storage في الباكت المحدد
         const { error: uploadError } = await supabase.storage
           .from('appearance_images')
           .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
-        // 2. جلب الرابط العام للصورة
+        // 2. جلب الرابط العام للملف
         const { data: { publicUrl } } = supabase.storage
           .from('appearance_images')
           .getPublicUrl(filePath);
 
-        // 3. تخزين الرابط ونوع الشاشة في الجدول
+        // 3. كتابة البيانات في جدول قاعدة البيانات
         const { error: dbError } = await supabase
           .from('hero_sliders')
           .insert([
@@ -81,25 +74,21 @@ const Appearance = () => {
         if (dbError) throw dbError;
       };
 
-      // رفع كل صور الديسكتوب
       for (const img of desktopImages) {
         await uploadAndSaveImage(img.file, 'desktop');
       }
 
-      // رفع كل صور الموبايل
       for (const img of mobileImages) {
         await uploadAndSaveImage(img.file, 'mobile');
       }
 
-      alert('Images uploaded and saved successfully!');
-      
-      // تفريغ الفورم بعد النجاح
+      alert('تم رفع وحفظ الصور بنجاح!');
       setDesktopImages([]);
       setMobileImages([]);
 
     } catch (error) {
       console.error('Upload Error:', error);
-      alert('An error occurred while uploading. Please check your connection and Supabase settings.');
+      alert('حصل خطأ أثناء الرفع، تأكد من إعدادات سوبابيس والاتصال بالإنترنت.');
     } finally {
       setIsUploading(false);
     }
@@ -114,7 +103,7 @@ const Appearance = () => {
     border: '1px solid #e5e5e5',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     color: '#000000',
-    direction: 'ltr', // عشان التصميم إنجليزي
+    direction: 'ltr',
     textAlign: 'left'
   };
 
@@ -171,7 +160,6 @@ const Appearance = () => {
     cursor: isUploading ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.2s'
   };
-  // ==========================================
 
   return (
     <div style={containerStyle}>

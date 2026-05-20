@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSliders } from '../../../services/appearanceService'; // تأكد من المسار
+import { fetchSliders } from '../../../../services/appearanceService'; // تم تصحيح المسار بدقة بناءً على الصورة
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -11,14 +11,12 @@ import 'swiper/css/pagination';
 
 const HeroSlider = () => {
   const swiperRef = useRef(null);
-  
-  // حالة لمعرفة نوع الشاشة (موبايل ولا ديسكتوب)
   const [isMobile, setIsMobile] = useState(false);
 
-  // متابعة تغيير حجم الشاشة
+  // متابعة تغيير حجم الشاشة لمعرفة نوع الجهاز
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize(); // التشغيل أول مرة
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -27,20 +25,18 @@ const HeroSlider = () => {
   const { data: sliders = [], isLoading, isError } = useQuery({
     queryKey: ['hero-sliders'],
     queryFn: fetchSliders,
-    staleTime: 1000 * 60 * 60, // كاش لمدة ساعة لأن الصور مابتتغيرش كتير
+    staleTime: 1000 * 60 * 60, // كاش لمدة ساعة للصور الثابتة
   });
 
-  // فلترة الصور حسب الشاشة (لو موبايل يجيب صور الموبايل، لو شاشة كبيرة يجيب الديسكتوب)
+  // فلترة الصور حسب الشاشة الحالية
   const activeSlides = sliders.filter(
     (slider) => slider.device_type === (isMobile ? 'mobile' : 'desktop')
   );
 
-  // لو لسه بيحمل
   if (isLoading) {
     return <div className="w-full h-[400px] md:h-[500px] bg-gray-100 animate-pulse flex items-center justify-center">جاري تحميل الصور...</div>;
   }
 
-  // لو حصل خطأ أو مفيش صور خالص
   if (isError || activeSlides.length === 0) {
     return <div className="w-full h-[400px] md:h-[500px] bg-gray-50 flex items-center justify-center">لا توجد صور لعرضها حالياً.</div>;
   }
@@ -87,7 +83,6 @@ const HeroSlider = () => {
       </button>
 
       <style jsx global>{`
-        /* تنسيق النقاط (Pagination) */
         .swiper-pagination-bullet {
           width: 8px;
           height: 8px;
@@ -99,7 +94,7 @@ const HeroSlider = () => {
           width: 24px;
           border-radius: 4px;
           opacity: 0.8;
-          background: #d4af37 !important; /* اللون الذهبي */
+          background: #d4af37 !important;
         }
       `}</style>
     </section>
