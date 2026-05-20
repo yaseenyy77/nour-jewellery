@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
+// تأكد إن مسار ملف سوبابيس صح بناءً على هيكل مشروعك
+import { supabase } from '../../../services/supabaseClient'; 
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
+  const [isUploading, setIsUploading] = useState(false); // حالة اللودينج أثناء الرفع
 
-  // Handle uploading and creating preview for Desktop
+  // اختيار وتجهيز صور الديسكتوب
   const handleDesktopChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files.map(file => ({
@@ -13,10 +16,10 @@ const Appearance = () => {
       preview: URL.createObjectURL(file)
     }));
     setDesktopImages(prev => [...prev, ...newImages]);
-    e.target.value = null; // Reset input to allow uploading same image
+    e.target.value = null; 
   };
 
-  // Handle uploading and creating preview for Mobile
+  // اختيار وتجهيز صور الموبايل
   const handleMobileChange = (e) => {
     const files = Array.from(e.target.files);
     const newImages = files.map(file => ({
@@ -25,40 +28,94 @@ const Appearance = () => {
       preview: URL.createObjectURL(file)
     }));
     setMobileImages(prev => [...prev, ...newImages]);
-    e.target.value = null; // Reset input
+    e.target.value = null; 
   };
 
-  // Remove specific desktop image
+  // حذف صورة ديسكتوب قبل الرفع
   const removeDesktopImage = (id) => {
     setDesktopImages(prev => prev.filter(img => img.id !== id));
   };
 
-  // Remove specific mobile image
+  // حذف صورة موبايل قبل الرفع
   const removeMobileImage = (id) => {
     setMobileImages(prev => prev.filter(img => img.id !== id));
   };
 
-  const handleSubmit = (e) => {
+  // دالة الإرسال للسيرفر (سوبابيس)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const formData = new FormData();
     
-    desktopImages.forEach((img) => formData.append('desktopImages', img.file));
-    mobileImages.forEach((img) => formData.append('mobileImages', img.file));
+    if (desktopImages.length === 0 && mobileImages.length === 0) {
+      alert("Please select at least one image to upload.");
+      return;
+    }
 
-    // Ready for your API service (e.g., adminService.js)
-    console.log('Form Submitted successfully');
+    setIsUploading(true);
+
+    try {
+      // دالة داخلية مسؤولة عن رفع صورة واحدة للباكت وتخزينها في الجدول
+      const uploadAndSaveImage = async (imageFile, deviceType) => {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${Math.random()}.${fileExt}`;
+        const filePath = `${deviceType}/${fileName}`; // بنقسمهم فولدرات وهمية
+
+        // 1. رفع الصورة للباكت
+        const { error: uploadError } = await supabase.storage
+          .from('appearance_images')
+          .upload(filePath, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        // 2. جلب الرابط العام للصورة
+        const { data: { publicUrl } } = supabase.storage
+          .from('appearance_images')
+          .getPublicUrl(filePath);
+
+        // 3. تخزين الرابط ونوع الشاشة في الجدول
+        const { error: dbError } = await supabase
+          .from('hero_sliders')
+          .insert([
+            { image_url: publicUrl, device_type: deviceType }
+          ]);
+
+        if (dbError) throw dbError;
+      };
+
+      // رفع كل صور الديسكتوب
+      for (const img of desktopImages) {
+        await uploadAndSaveImage(img.file, 'desktop');
+      }
+
+      // رفع كل صور الموبايل
+      for (const img of mobileImages) {
+        await uploadAndSaveImage(img.file, 'mobile');
+      }
+
+      alert('Images uploaded and saved successfully!');
+      
+      // تفريغ الفورم بعد النجاح
+      setDesktopImages([]);
+      setMobileImages([]);
+
+    } catch (error) {
+      console.error('Upload Error:', error);
+      alert('An error occurred while uploading. Please check your connection and Supabase settings.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  // Shared Styles for Theme Alignment (Black & White Theme)
+  // ================= STYLES =================
   const containerStyle = {
     maxWidth: '900px',
     margin: '40px auto',
     padding: '40px',
     backgroundColor: '#ffffff',
     border: '1px solid #e5e5e5',
-    borderRadius: '0px', // Clean, sharp dashboard look
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    color: '#000000'
+    color: '#000000',
+    direction: 'ltr', // عشان التصميم إنجليزي
+    textAlign: 'left'
   };
 
   const headerStyle = {
@@ -105,15 +162,16 @@ const Appearance = () => {
   const submitBtnStyle = {
     width: '100%',
     padding: '16px',
-    backgroundColor: '#000000',
+    backgroundColor: isUploading ? '#cccccc' : '#000000',
     color: '#ffffff',
     border: 'none',
     fontSize: '16px',
     fontWeight: '600',
     letterSpacing: '0.5px',
-    cursor: 'pointer',
+    cursor: isUploading ? 'not-allowed' : 'pointer',
     transition: 'background-color 0.2s'
   };
+  // ==========================================
 
   return (
     <div style={containerStyle}>
@@ -129,7 +187,7 @@ const Appearance = () => {
           <h3 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Desktop Layout Images</h3>
           <p style={{ fontSize: '12px', color: '#666666', margin: '0 0 16px 0' }}>Will be displayed only on large screens and monitors.</p>
           
-          <label style={uploadBtnStyle} onMouseOver={(e) => e.target.style.backgroundColor = '#333333'} onMouseOut={(e) => e.target.style.backgroundColor = '#000000'}>
+          <label style={uploadBtnStyle}>
             + Add Desktop Image
             <input type="file" accept="image/*" multiple onChange={handleDesktopChange} style={{ display: 'none' }} />
           </label>
@@ -155,7 +213,7 @@ const Appearance = () => {
           <h3 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Mobile Layout Images</h3>
           <p style={{ fontSize: '12px', color: '#666666', margin: '0 0 16px 0' }}>Will be displayed only on handheld and compact mobile devices.</p>
           
-          <label style={uploadBtnStyle} onMouseOver={(e) => e.target.style.backgroundColor = '#333333'} onMouseOut={(e) => e.target.style.backgroundColor = '#000000'}>
+          <label style={uploadBtnStyle}>
             + Add Mobile Image
             <input type="file" accept="image/*" multiple onChange={handleMobileChange} style={{ display: 'none' }} />
           </label>
@@ -179,11 +237,10 @@ const Appearance = () => {
         {/* SUBMIT BUTTON */}
         <button 
           type="submit" 
+          disabled={isUploading}
           style={submitBtnStyle}
-          onMouseOver={(e) => e.target.style.backgroundColor = '#333333'}
-          onMouseOut={(e) => e.target.style.backgroundColor = '#000000'}
         >
-          SAVE CHANGES
+          {isUploading ? 'UPLOADING...' : 'SAVE CHANGES'}
         </button>
 
       </form>

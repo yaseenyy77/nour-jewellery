@@ -1,20 +1,49 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { fetchSliders } from '../../../services/appearanceService'; // تأكد من المسار
 
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-// استيراد الصور
-import goldImg from '../../../assets/images/دهب.png';
-import silverImg from '../../../assets/images/فضة.png';
-import luxuryImg from '../../../assets/images/غالي.png';
-
 const HeroSlider = () => {
   const swiperRef = useRef(null);
-  const slides = [goldImg, silverImg, luxuryImg];
+  
+  // حالة لمعرفة نوع الشاشة (موبايل ولا ديسكتوب)
+  const [isMobile, setIsMobile] = useState(false);
+
+  // متابعة تغيير حجم الشاشة
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    handleResize(); // التشغيل أول مرة
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // جلب البيانات بـ React Query
+  const { data: sliders = [], isLoading, isError } = useQuery({
+    queryKey: ['hero-sliders'],
+    queryFn: fetchSliders,
+    staleTime: 1000 * 60 * 60, // كاش لمدة ساعة لأن الصور مابتتغيرش كتير
+  });
+
+  // فلترة الصور حسب الشاشة (لو موبايل يجيب صور الموبايل، لو شاشة كبيرة يجيب الديسكتوب)
+  const activeSlides = sliders.filter(
+    (slider) => slider.device_type === (isMobile ? 'mobile' : 'desktop')
+  );
+
+  // لو لسه بيحمل
+  if (isLoading) {
+    return <div className="w-full h-[400px] md:h-[500px] bg-gray-100 animate-pulse flex items-center justify-center">جاري تحميل الصور...</div>;
+  }
+
+  // لو حصل خطأ أو مفيش صور خالص
+  if (isError || activeSlides.length === 0) {
+    return <div className="w-full h-[400px] md:h-[500px] bg-gray-50 flex items-center justify-center">لا توجد صور لعرضها حالياً.</div>;
+  }
 
   return (
     <section className="relative w-full group overflow-hidden bg-gray-50">
@@ -29,13 +58,13 @@ const HeroSlider = () => {
         pagination={{ clickable: true }}
         className="w-full h-[400px] md:h-[500px]" 
       >
-        {slides.map((img, index) => (
-          <SwiperSlide key={index}>
+        {activeSlides.map((slide) => (
+          <SwiperSlide key={slide.id}>
             <div className="w-full h-full">
               <img 
-                src={img} 
+                src={slide.image_url} 
                 className="w-full h-full object-cover object-center" 
-                alt={`slide-${index}`} 
+                alt="hero-slide" 
               />
             </div>
           </SwiperSlide>
