@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSliders } from '../../../services/appearanceService'; // تم التصحيح لـ 3 خطوات فقط
+import { fetchSliders } from '../../../appearanceService'; // تم التصحيح لـ 3 خطوات فقط
 
 import 'swiper/css';
 import 'swiper/css/navigation';
