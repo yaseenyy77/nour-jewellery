@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '/../supabaseClient'; // تم التصحيح لـ 4 خطوات فقط لورا للوصول للـ src
+import { supabase } from '../../supabaseClient'; // تم التصحيح لـ 4 خطوات فقط لورا للوصول للـ src
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
