@@ -1,158 +1,166 @@
 import React, { useState } from 'react';
-import { 
-  Palette, Image as ImageIcon, Type, 
-  Check, Upload, Sun, Moon, Layout
-} from 'lucide-react';
+// استيراد المكونات المشتركة الجاهزة من مجلد الـ ui الخاص بك
+import Button from '../../../components/ui/Button'; 
+import Input from '../../../components/ui/Input';
 
 const Appearance = () => {
-  const [selectedColor, setSelectedColor] = useState('#000000');
-  const [theme, setTheme] = useState('light');
+  // حالة حفظ بيانات المظهر (ألوان ونصوص وصور)
+  const [formData, setFormData] = useState({
+    primaryColor: '#000000',
+    secondaryColor: '#ffffff',
+    heroTitle: '',
+  });
 
-  const brandColors = [
-    { name: 'Classic Black', hex: '#000000' },
-    { name: 'Royal Gold', hex: '#D4AF37' },
-    { name: 'Deep Navy', hex: '#000080' },
-    { name: 'Soft Rose', hex: '#E29595' },
-    { name: 'Emerald', hex: '#047857' },
-  ];
+  // حالة حفظ الصور ومعاينتها
+  const [heroImage, setHeroImage] = useState(null);
+  const [heroImagePreview, setHeroImagePreview] = useState('');
+  const [logo, setLogo] = useState(null);
+  const [logoPreview, setLogoPreview] = useState('');
+
+  // التعامل مع تغيير الحقول النصية والألوان
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // التعامل مع رفع الصور والتحقق من الصيغ
+  const handleImageChange = (e, type) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // التحقق من أن الملف المرفوع هو صورة بالفعل (jpg, jpeg, png, webp, إلخ)
+    if (!file.type.startsWith('image/')) {
+      alert('يرجى اختيار ملف صورة صالح فقط (PNG, JPG, ...)!');
+      return;
+    }
+
+    // إنشاء رابط للمعاينة الفورية داخل المتصفح
+    const previewUrl = URL.createObjectURL(file);
+
+    if (type === 'hero') {
+      setHeroImage(file);
+      setHeroImagePreview(previewUrl);
+    } else if (type === 'logo') {
+      setLogo(file);
+      setLogoPreview(previewUrl);
+    }
+  };
+
+  // إرسال الفورم إلى السيرفر
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    // نستخدم FormData لأننا نقوم برفع ملفات وصور بجانب النصوص والألوان
+    const dataToSend = new FormData();
+    dataToSend.append('primaryColor', formData.primaryColor);
+    dataToSend.append('secondaryColor', formData.secondaryColor);
+    dataToSend.append('heroTitle', formData.heroTitle);
+    
+    if (heroImage) dataToSend.append('heroImage', heroImage);
+    if (logo) dataToSend.append('logo', logo);
+
+    // هنا يمكنك استدعاء سيرفيس الـ API الخاصة بك (مثل adminService) لحفظ البيانات
+    console.log('جاري حفظ البيانات...', formData);
+    alert('تم حفظ إعدادات المظهر بنجاح! (معاينة في الكونسول)');
+  };
 
   return (
-    <div className="max-w-5xl mx-auto pb-20">
-      {/* Header Section */}
-      <div className="mb-10">
-        <h1 className="text-3xl font-black tracking-tighter uppercase flex items-center gap-3">
-          <Palette className="text-black" size={32} strokeWidth={2.5} />
-          Appearance Settings
-        </h1>
-        <p className="text-gray-400 text-xs font-bold tracking-widest mt-2 uppercase">
-          Customize your store's visual identity
-        </p>
+    <div className="p-6 max-w-4xl mx-auto bg-white rounded-xl shadow-md space-y-6 text-right" dir="rtl">
+      <div className="border-b pb-4">
+        <h2 className="text-2xl font-bold text-gray-800">إعدادات مظهر الموقع (Appearance)</h2>
+        <p className="text-sm text-gray-500 mt-1">التحكم في ألوان وصور البانر الرئيسي للموقع</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Left Column: UI Controls */}
-        <div className="lg:col-span-2 space-y-8">
-          
-          {/* Brand Identity Section */}
-          <section className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm">
-            <h2 className="text-sm font-black tracking-widest uppercase mb-6 flex items-center gap-2">
-              <Layout size={18} /> Visual Identity
-            </h2>
-            
-            <div className="space-y-6">
-              {/* Color Picker */}
-              <div>
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">
-                  Primary Brand Color
-                </label>
-                <div className="flex flex-wrap gap-4">
-                  {brandColors.map((color) => (
-                    <button
-                      key={color.hex}
-                      onClick={() => setSelectedColor(color.hex)}
-                      className={`w-12 h-12 rounded-full border-4 transition-all duration-300 flex items-center justify-center ${
-                        selectedColor === color.hex ? 'border-black scale-110' : 'border-transparent'
-                      }`}
-                      style={{ backgroundColor: color.hex }}
-                    >
-                      {selectedColor === color.hex && (
-                        <Check size={20} className={color.hex === '#000000' ? 'text-white' : 'text-black'} />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Theme Toggle */}
-              <div className="pt-6 border-t border-gray-50">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-4">
-                  System Theme
-                </label>
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => setTheme('light')}
-                    className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${
-                      theme === 'light' ? 'border-black bg-black text-white' : 'border-gray-100 text-gray-400'
-                    }`}
-                  >
-                    <Sun size={20} />
-                    <span className="text-[10px] font-black">LIGHT MODE</span>
-                  </button>
-                  <button 
-                    onClick={() => setTheme('dark')}
-                    className={`flex-1 py-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${
-                      theme === 'dark' ? 'border-black bg-black text-white' : 'border-gray-100 text-gray-400'
-                    }`}
-                  >
-                    <Moon size={20} />
-                    <span className="text-[10px] font-black">DARK MODE</span>
-                  </button>
-                </div>
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* قسم الألوان */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-b pb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">اللون الأساسي للموقع (Primary)</label>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                name="primaryColor"
+                value={formData.primaryColor}
+                onChange={handleInputChange}
+                className="w-16 h-10 p-1 cursor-pointer rounded-md"
+              />
+              <span className="text-sm text-gray-600 font-mono">{formData.primaryColor}</span>
             </div>
-          </section>
-
-          {/* Hero Section Banner Management */}
-          <section className="bg-white border border-gray-100 rounded-[2rem] p-8 shadow-sm">
-            <h2 className="text-sm font-black tracking-widest uppercase mb-6 flex items-center gap-2">
-              <ImageIcon size={18} /> Home Hero Banner
-            </h2>
-            <div className="border-2 border-dashed border-gray-100 rounded-3xl p-10 flex flex-col items-center justify-center group hover:border-black transition-colors cursor-pointer">
-              <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 group-hover:bg-black group-hover:text-white transition-all">
-                <Upload size={24} />
-              </div>
-              <p className="text-[10px] font-black tracking-widest text-gray-400 uppercase">Click to upload new banner</p>
-              <p className="text-[8px] text-gray-300 mt-2">Recommended size: 1920x1080px</p>
-            </div>
-          </section>
-
-        </div>
-
-        {/* Right Column: Live Preview Placeholder */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24 bg-black rounded-[2.5rem] p-6 text-white min-h-[400px] flex flex-col shadow-2xl overflow-hidden">
-             <div className="flex justify-between items-center mb-10">
-                <div className="w-8 h-8 rounded-full bg-white/20"></div>
-                <div className="flex gap-2">
-                  <div className="w-4 h-1 bg-white/20 rounded-full"></div>
-                  <div className="w-4 h-1 bg-white/20 rounded-full"></div>
-                </div>
-             </div>
-
-             <div className="space-y-4">
-                <div className="h-4 w-3/4 bg-white/10 rounded-full animate-pulse"></div>
-                <div className="h-10 w-full bg-white rounded-xl flex items-center px-4">
-                   <div className="h-2 w-20 bg-black/10 rounded-full"></div>
-                </div>
-                <div className="grid grid-cols-2 gap-2 pt-4">
-                   <div className="aspect-square bg-white/5 rounded-2xl"></div>
-                   <div className="aspect-square bg-white/5 rounded-2xl"></div>
-                </div>
-             </div>
-
-             <div className="mt-auto">
-                <div 
-                  className="w-full py-4 rounded-2xl text-center text-[10px] font-black tracking-[0.3em] transition-colors"
-                  style={{ backgroundColor: selectedColor, color: selectedColor === '#000000' ? 'white' : 'black' }}
-                >
-                  PREVIEW MODE
-                </div>
-             </div>
           </div>
-          <p className="text-center mt-4 text-[9px] font-black text-gray-300 tracking-widest uppercase">
-            Live Interface Preview
-          </p>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">اللون الفرعي للموقع (Secondary)</label>
+            <div className="flex gap-2 items-center">
+              <Input
+                type="color"
+                name="secondaryColor"
+                value={formData.secondaryColor}
+                onChange={handleInputChange}
+                className="w-16 h-10 p-1 cursor-pointer rounded-md"
+              />
+              <span className="text-sm text-gray-600 font-mono">{formData.secondaryColor}</span>
+            </div>
+          </div>
         </div>
 
-      </div>
+        {/* قسم النصوص والبانر */}
+        <div className="space-y-4 border-b pb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">عنوان البانر الرئيسي (Hero Title)</label>
+            <Input
+              type="text"
+              name="heroTitle"
+              placeholder="اكتب العنوان الذي سيظهر على السلايدر الرئيسي"
+              value={formData.heroTitle}
+              onChange={handleInputChange}
+              className="w-full"
+            />
+          </div>
 
-      {/* Action Bar */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 lg:left-auto lg:right-12 lg:translate-x-0 z-50">
-        <button className="bg-black text-white px-10 py-5 rounded-full font-black text-xs tracking-[0.3em] shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-3">
-          SAVE CHANGES
-        </button>
-      </div>
+          {/* رفع صورة اللوجو */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">لوجو الموقع (Logo)</label>
+              <Input
+                type="file"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                onChange={(e) => handleImageChange(e, 'logo')}
+                className="w-full text-sm text-gray-500 file:ml-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+              />
+            </div>
+            {logoPreview && (
+              <div className="border rounded-lg p-2 flex justify-center bg-gray-50 h-24 items-center">
+                <img src={logoPreview} alt="Logo Preview" className="max-h-full max-w-full object-contain" />
+              </div>
+            )}
+          </div>
+
+          {/* رفع صورة الهيروو/السلايدر */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">صورة خلفية البانر (Hero Image)</label>
+              <Input
+                type="file"
+                accept="image/png, image/jpeg, image/jpg, image/webp"
+                onChange={(e) => handleImageChange(e, 'hero')}
+                className="w-full text-sm text-gray-500 file:ml-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
+              />
+            </div>
+            {heroImagePreview && (
+              <div className="border rounded-lg p-2 flex justify-center bg-gray-50 h-32 items-center">
+                <img src={heroImagePreview} alt="Hero Preview" className="max-h-full max-w-full object-cover rounded" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* زر الحفظ والتأكيد */}
+        <div className="flex justify-start">
+          <Button type="submit" variant="primary" className="px-6 py-2 text-white bg-blue-600 hover:bg-blue-700 rounded-lg font-medium shadow">
+            حفظ التغييرات والمظهر
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
