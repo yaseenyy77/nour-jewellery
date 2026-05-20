@@ -1,4 +1,4 @@
-import { supabase } from 'supabaseClient'; // تم التصحيح لخطوة واحدة لورا
+import { supabase } from '../supabaseClient'; // تم التصحيح لخطوة واحدة لورا
 
 export const fetchSliders = async () => {
   const { data, error } = await supabase
