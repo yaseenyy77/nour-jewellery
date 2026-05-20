@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../../../../supabaseClient'; // تم ضبط المسار للمجلد الرئيسي بدقة بالخروج 5 خطوات لورا
+import { supabase } from '../../../../supabaseClient'; // تم التصحيح لـ 4 خطوات فقط لورا للوصول للـ src
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
@@ -40,7 +40,7 @@ const Appearance = () => {
     e.preventDefault();
     
     if (desktopImages.length === 0 && mobileImages.length === 0) {
-      alert("From فضلك اختر صورة واحدة على الأقل!");
+      alert("من فضلك اختر صورة واحدة على الأقل!");
       return;
     }
 
@@ -52,19 +52,16 @@ const Appearance = () => {
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${deviceType}/${fileName}`;
 
-        // 1. الرفع للـ Storage في الباكت المحدد
         const { error: uploadError } = await supabase.storage
           .from('appearance_images')
           .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
-        // 2. جلب الرابط العام للملف
         const { data: { publicUrl } } = supabase.storage
           .from('appearance_images')
           .getPublicUrl(filePath);
 
-        // 3. كتابة البيانات في جدول قاعدة البيانات
         const { error: dbError } = await supabase
           .from('hero_sliders')
           .insert([
@@ -170,7 +167,6 @@ const Appearance = () => {
 
       <form onSubmit={handleSubmit}>
         
-        {/* DESKTOP IMAGES SECTION */}
         <div style={sectionStyle}>
           <h3 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Desktop Layout Images</h3>
           <p style={{ fontSize: '12px', color: '#666666', margin: '0 0 16px 0' }}>Will be displayed only on large screens and monitors.</p>
@@ -196,7 +192,6 @@ const Appearance = () => {
           </div>
         </div>
 
-        {/* MOBILE IMAGES SECTION */}
         <div style={sectionStyle}>
           <h3 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Mobile Layout Images</h3>
           <p style={{ fontSize: '12px', color: '#666666', margin: '0 0 16px 0' }}>Will be displayed only on handheld and compact mobile devices.</p>
@@ -222,7 +217,6 @@ const Appearance = () => {
           </div>
         </div>
 
-        {/* SUBMIT BUTTON */}
         <button 
           type="submit" 
           disabled={isUploading}

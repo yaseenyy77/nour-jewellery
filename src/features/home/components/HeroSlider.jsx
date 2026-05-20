@@ -3,7 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay, Pagination } from 'swiper/modules';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchSliders } from '../../../../services/appearanceService'; // تم تصحيح المسار بدقة بناءً على الصورة
+import { fetchSliders } from '../../../services/appearanceService'; // تم التصحيح لـ 3 خطوات فقط
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -13,7 +13,6 @@ const HeroSlider = () => {
   const swiperRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
 
-  // متابعة تغيير حجم الشاشة لمعرفة نوع الجهاز
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     handleResize();
@@ -21,14 +20,12 @@ const HeroSlider = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // جلب البيانات بـ React Query
   const { data: sliders = [], isLoading, isError } = useQuery({
     queryKey: ['hero-sliders'],
     queryFn: fetchSliders,
-    staleTime: 1000 * 60 * 60, // كاش لمدة ساعة للصور الثابتة
+    staleTime: 1000 * 60 * 60, 
   });
 
-  // فلترة الصور حسب الشاشة الحالية
   const activeSlides = sliders.filter(
     (slider) => slider.device_type === (isMobile ? 'mobile' : 'desktop')
   );
@@ -67,7 +64,6 @@ const HeroSlider = () => {
         ))}
       </Swiper>
 
-      {/* الأسهم المخصصة */}
       <button 
         onClick={() => swiperRef.current?.slidePrev()}
         className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-2 rounded-full bg-white/30 backdrop-blur-sm border border-white/50 text-gray-800 opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm"
