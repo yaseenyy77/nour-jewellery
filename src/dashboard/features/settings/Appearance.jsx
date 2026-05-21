@@ -1,302 +1,240 @@
 import React, { useState } from 'react';
 import { supabase } from '../../../../supabaseClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Monitor, 
+  Smartphone, 
+  Trash2, 
+  UploadCloud, 
+  Plus, 
+  X, 
+  CheckCircle2, 
+  Image as ImageIcon,
+  Loader2
+} from 'lucide-react';
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
-  
   const queryClient = useQueryClient();
 
-  // 1. جلب الصور المرفوعة حالياً في السيرفر فور دخول الصفحة
+  // جلب الصور الحالية
   const { data: sliders = [], isLoading: isFetchingSliders } = useQuery({
     queryKey: ['hero-sliders'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('hero_sliders')
-        .select('*')
-        .order('id', { ascending: false });
-      
+      const { data, error } = await supabase.from('hero_sliders').select('*').order('id', { ascending: false });
       if (error) throw error;
       return data;
     }
   });
 
-  // تصفية الصور المجلوبة حسب نوع الجهاز
   const liveDesktopImages = sliders.filter(img => img.device_type === 'desktop');
   const liveMobileImages = sliders.filter(img => img.device_type === 'mobile');
 
-  // 2. إعداد عملية الحذف الفوري من قاعدة البيانات والـ Storage
+  // موتيشن الحذف
   const deleteMutation = useMutation({
     mutationFn: async ({ id, imageUrl }) => {
-      // أ) استخراج مسار الملف داخل الـ Bucket من الرابط العام
-      // مثلاً يحول الرابط إلى: desktop/filename.png
       const urlParts = imageUrl.split('/appearance_images/');
       if (urlParts.length > 1) {
-        const filePath = urlParts[1];
-        // حذف الملف من الـ Storage أولاً
-        await supabase.storage.from('appearance_images').remove([filePath]);
+        await supabase.storage.from('appearance_images').remove([urlParts[1]]);
       }
-
-      // ب) حذف السجل من جدول قاعدة البيانات
-      const { error } = await supabase
-        .from('hero_sliders')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('hero_sliders').delete().eq('id', id);
       if (error) throw error;
     },
-    onSuccess: () => {
-      // تحديث البيانات تلقائياً وفوراً في لوحة التحكم وفي الموقع الرئيسي
-      queryClient.invalidateQueries({ queryKey: ['hero-sliders'] });
-    },
-    onError: (error) => {
-      console.error('Delete Error:', error);
-      alert(`حصل خطأ أثناء الحذف: ${error.message}`);
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['hero-sliders'] }),
   });
 
-  const handleDeleteLiveImage = (id, imageUrl) => {
-    if (window.confirm('هل أنت متأكد من حذف هذه الصورة نهائياً من الموقع والسيرفر؟')) {
-      deleteMutation.mutate({ id, imageUrl });
-    }
-  };
-
-  // 3. التعامل مع اختيار صور جديدة (Previews)
-  const handleDesktopChange = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
-      id: Date.now() + Math.random(),
-      file: file,
-      preview: URL.createObjectURL(file)
-    }));
-    setDesktopImages(prev => [...prev, ...newImages]);
-    e.target.value = null; 
-  };
-
-  const handleMobileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = files.map(file => ({
-      id: Date.now() + Math.random(),
-      file: file,
-      preview: URL.createObjectURL(file)
-    }));
-    setMobileImages(prev => [...prev, ...newImages]);
-    e.target.value = null; 
-  };
-
-  // 4. إعداد عملية الرفع للصور الجديدة
+  // موتيشن الرفع
   const uploadMutation = useMutation({
     mutationFn: async () => {
-      const uploadAndSaveImage = async (imageFile, deviceType) => {
-        const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+      const uploadAndSave = async (imageFile, deviceType) => {
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${imageFile.name.split('.').pop()}`;
         const filePath = `${deviceType}/${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('appearance_images')
-          .upload(filePath, imageFile);
-
-        if (uploadError) throw uploadError;
-
-        const { data: { publicUrl } } = supabase.storage
-          .from('appearance_images')
-          .getPublicUrl(filePath);
-
-        const { error: dbError } = await supabase
-          .from('hero_sliders')
-          .insert([
-            { image_url: publicUrl, device_type: deviceType }
-          ]);
-
-        if (dbError) throw dbError;
+        const { error: upErr } = await supabase.storage.from('appearance_images').upload(filePath, imageFile);
+        if (upErr) throw upErr;
+        const { data: { publicUrl } } = supabase.storage.from('appearance_images').getPublicUrl(filePath);
+        const { error: dbErr } = await supabase.from('hero_sliders').insert([{ image_url: publicUrl, device_type: deviceType }]);
+        if (dbErr) throw dbErr;
       };
-
-      for (const img of desktopImages) {
-        await uploadAndSaveImage(img.file, 'desktop');
-      }
-
-      for (const img of mobileImages) {
-        await uploadAndSaveImage(img.file, 'mobile');
-      }
+      await Promise.all([
+        ...desktopImages.map(img => uploadAndSave(img.file, 'desktop')),
+        ...mobileImages.map(img => uploadAndSave(img.file, 'mobile'))
+      ]);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hero-sliders'] });
-      alert('تم رفع وحفظ الصور الجديدة بنجاح والتحديث فوري!');
       setDesktopImages([]);
       setMobileImages([]);
-    },
-    onError: (error) => {
-      console.error('Upload Error:', error);
-      alert(`حصل خطأ أثناء الرفع: ${error.message}`);
+      alert('Banners updated successfully! ✨');
     }
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (desktopImages.length === 0 && mobileImages.length === 0) {
-      alert("من فضلك اختر صورة جديدة واحدة على الأقل لرفعها!");
-      return;
-    }
-    uploadMutation.mutate();
+  const handleFileChange = (e, setter) => {
+    const files = Array.from(e.target.files).map(file => ({
+      id: Math.random(),
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    setter(prev => [...prev, ...files]);
+    e.target.value = null;
   };
 
-  // ================= STYLES (Minimalist Black & White) =================
-  const styles = {
-    container: { maxWidth: '1000px', margin: '40px auto', padding: '20px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#000000', direction: 'ltr', textAlign: 'left' },
-    header: { borderBottom: '2px solid #000000', paddingBottom: '20px', marginBottom: '32px' },
-    section: { marginBottom: '40px', padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#ffffff' },
-    subTitle: { fontSize: '12px', color: '#666666', margin: '0 0 16px 0', textTransform: 'uppercase', letterSpacing: '0.5px' },
-    gridTitle: { fontSize: '13px', fontWeight: '600', textTransform: 'uppercase', margin: '16px 0 8px 0', color: '#000000', borderBottom: '1px dashed #e5e5e5', paddingBottom: '4px' },
-    uploadBtn: { display: 'inline-block', padding: '12px 24px', backgroundColor: '#000000', color: '#ffffff', fontSize: '13px', fontWeight: '600', letterSpacing: '0.5px', cursor: 'pointer', textAlign: 'center', border: '1px solid #000000', transition: 'all 0.2s' },
-    grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '16px', marginTop: '12px', marginBottom: '24px' },
-    previewContainer: { position: 'relative', width: '100%', height: '140px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa', overflow: 'hidden' },
-    badgeLive: { position: 'absolute', bottom: '4px', left: '4px', backgroundColor: '#000000', color: '#ffffff', fontSize: '9px', fontWeight: 'bold', padding: '2px 6px', textTransform: 'uppercase' },
-    badgePending: { position: 'absolute', bottom: '4px', left: '4px', backgroundColor: '#ffffff', color: '#000000', border: '1px solid #000000', fontSize: '9px', fontWeight: 'bold', padding: '2px 6px', textTransform: 'uppercase' },
-    deleteBtn: { position: 'absolute', top: '6px', right: '6px', backgroundColor: '#000000', color: '#ffffff', border: 'none', width: '24px', height: '24px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifycontent: 'center', transition: 'transform 0.1s' },
-    submitBtn: { width: '100%', padding: '18px', backgroundColor: uploadMutation.isPending ? '#e5e5e5' : '#000000', color: uploadMutation.isPending ? '#999999' : '#ffffff', border: 'none', fontSize: '14px', fontWeight: '700', letterSpacing: '1px', cursor: uploadMutation.isPending ? 'not-allowed' : 'pointer', textTransform: 'uppercase', transition: 'background-color 0.2s' },
-    loadingText: { textAlign: 'center', padding: '40px', fontSize: '14px', color: '#666666', letterSpacing: '1px' }
+  // ================= STYLES =================
+  const theme = {
+    gold: '#D4AF37',
+    black: '#0A0A0A',
+    gray: '#F5F5F5',
+    white: '#FFFFFF',
+    red: '#FF4D4D'
   };
 
-  if (isFetchingSliders) {
-    return <div style={styles.loadingText}>LOADING CURRENT SETTINGS...</div>;
-  }
+  const containerStyle = {
+    maxWidth: '1100px',
+    margin: '40px auto',
+    padding: '0 20px',
+    fontFamily: '"Inter", sans-serif',
+    direction: 'ltr',
+    color: theme.black
+  };
+
+  const cardStyle = {
+    background: theme.white,
+    borderRadius: '16px',
+    padding: '30px',
+    marginBottom: '30px',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+    border: '1px solid #eee'
+  };
+
+  if (isFetchingSliders) return (
+    <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '15px' }}>
+      <Loader2 size={40} className="animate-spin" style={{ color: theme.gold }} />
+      <p style={{ letterSpacing: '2px', fontWeight: '500', color: '#666' }}>REFINING YOUR VIEW...</p>
+    </div>
+  );
 
   return (
-    <div style={styles.container}>
-      <div style={styles.header}>
-        <h2 style={{ fontSize: '28px', fontWeight: '800', textTransform: 'uppercase', margin: 0, letterSpacing: '0.5px' }}>Appearance Control</h2>
-        <p style={{ fontSize: '13px', color: '#666666', marginTop: '6px' }}>View, delete, or add premium banners across desktop and mobile screens live.</p>
-      </div>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+      style={containerStyle}
+    >
+      {/* Header */}
+      <header style={{ marginBottom: '40px', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
+          Visual <span style={{ color: theme.gold }}>Experience</span>
+        </h1>
+        <p style={{ color: '#666', fontSize: '15px' }}>Curate the luxury aesthetic of your jewellery banners</p>
+      </header>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={(e) => { e.preventDefault(); uploadMutation.mutate(); }}>
         
-        {/* ================= DESKTOP SECTION ================= */}
-        <div style={styles.section}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Desktop Banners</h3>
-          <p style={styles.subTitle}>Displayed on computers and large screens.</p>
-          
-          {/* صور الديسكتوب الحالية */}
-          <h4 style={styles.gridTitle}>Active Banners ({liveDesktopImages.length})</h4>
-          {liveDesktopImages.length === 0 ? (
-            <p style={{ fontSize: '12px', color: '#999999', italic: 'true' }}>No active desktop banners. Upload some below.</p>
-          ) : (
-            <div style={styles.grid}>
-              {liveDesktopImages.map((img) => (
-                <div key={img.id} style={styles.previewContainer}>
-                  <img src={img.image_url} alt="Live Desktop" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <span style={styles.badgeLive}>Live</span>
-                  <button 
-                    type="button" 
-                    disabled={deleteMutation.isPending}
-                    onClick={() => handleDeleteLiveImage(img.id, img.image_url)}
-                    style={{ ...styles.deleteBtn, opacity: deleteMutation.isPending ? 0.5 : 1 }}
-                  >
-                    ✕
-                  </button>
+        {/* Section Template */}
+        {[
+          { title: 'Desktop Masterpiece', subtitle: 'Widescreen HD Banners', icon: <Monitor size={20}/>, live: liveDesktopImages, pending: desktopImages, setter: setDesktopImages, type: 'desktop' },
+          { title: 'Mobile Elegance', subtitle: 'Handheld Optimized Banners', icon: <Smartphone size={20}/>, live: liveMobileImages, pending: mobileImages, setter: setMobileImages, type: 'mobile' }
+        ].map((sec, idx) => (
+          <section key={idx} style={cardStyle}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '25px' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
+                  <span style={{ color: theme.gold }}>{sec.icon}</span>
+                  <h3 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>{sec.title}</h3>
                 </div>
-              ))}
-            </div>
-          )}
-
-          {/* زر اختيار صور ديسكتوب جديدة */}
-          <label style={styles.uploadBtn}>
-            + Select New Desktop Image
-            <input type="file" accept="image/*" multiple onChange={handleDesktopChange} style={{ display: 'none' }} />
-          </label>
-
-          {/* بريفيو الصور الجديدة المحددة */}
-          {desktopImages.length > 0 && (
-            <>
-              <h4 style={styles.gridTitle}>New To Upload ({desktopImages.length})</h4>
-              <div style={styles.grid}>
-                {desktopImages.map((img) => (
-                  <div key={img.id} style={styles.previewContainer}>
-                    <img src={img.preview} alt="New Desktop Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <span style={styles.badgePending}>New</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setDesktopImages(prev => prev.filter(i => i.id !== img.id))}
-                      style={styles.deleteBtn}
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ))}
+                <p style={{ fontSize: '13px', color: '#888' }}>{sec.subtitle}</p>
               </div>
-            </>
-          )}
-        </div>
+              
+              <label style={{ 
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', 
+                padding: '10px 20px', borderRadius: '8px', border: `1px solid ${theme.black}`,
+                fontSize: '13px', fontWeight: '600', transition: 'all 0.2s'
+              }}>
+                <Plus size={16} /> Add New
+                <input type="file" hidden multiple onChange={(e) => handleFileChange(e, sec.setter)} />
+              </label>
+            </div>
 
-        {/* ================= MOBILE SECTION ================= */}
-        <div style={styles.section}>
-          <h3 style={{ fontSize: '18px', fontWeight: '700', textTransform: 'uppercase', margin: '0 0 4px 0' }}>Mobile Banners</h3>
-          <p style={styles.subTitle}>Displayed on phones and compact viewports.</p>
-          
-          {/* صور الموبايل الحالية */}
-          <h4 style={styles.gridTitle}>Active Banners ({liveMobileImages.length})</h4>
-          {liveMobileImages.length === 0 ? (
-            <p style={{ fontSize: '12px', color: '#999999', italic: 'true' }}>No active mobile banners. Upload some below.</p>
-          ) : (
-            <div style={styles.grid}>
-              {liveMobileImages.map((img) => (
-                <div key={img.id} style={styles.previewContainer}>
-                  <img src={img.image_url} alt="Live Mobile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  <span style={styles.badgeLive}>Live</span>
-                  <button 
-                    type="button" 
-                    disabled={deleteMutation.isPending}
-                    onClick={() => handleDeleteLiveImage(img.id, img.image_url)}
-                    style={{ ...styles.deleteBtn, opacity: deleteMutation.isPending ? 0.5 : 1 }}
+            {/* Grid for Images */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+              <AnimatePresence>
+                {/* Live Images */}
+                {sec.live.map((img) => (
+                  <motion.div 
+                    layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }}
+                    key={img.id} style={{ position: 'relative', height: '120px', borderRadius: '12px', overflow: 'hidden', group: 'true' }}
                   >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* زر اختيار صور موبايل جديدة */}
-          <label style={styles.uploadBtn}>
-            + Select New Mobile Image
-            <input type="file" accept="image/*" multiple onChange={handleMobileChange} style={{ display: 'none' }} />
-          </label>
-
-          {/* بريفيو صور الموبايل الجديدة */}
-          {mobileImages.length > 0 && (
-            <>
-              <h4 style={styles.gridTitle}>New To Upload ({mobileImages.length})</h4>
-              <div style={styles.grid}>
-                {mobileImages.map((img) => (
-                  <div key={img.id} style={styles.previewContainer}>
-                    <img src={img.preview} alt="New Mobile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    <span style={styles.badgePending}>New</span>
-                    <button 
-                      type="button" 
-                      onClick={() => setMobileImages(prev => prev.filter(i => i.id !== img.id))}
-                      style={styles.deleteBtn}
-                    >
-                      ✕
-                    </button>
-                  </div>
+                    <img src={img.image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Banner" />
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: '0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="hover-overlay">
+                        <button 
+                          type="button" onClick={() => window.confirm('Delete forever?') && deleteMutation.mutate({ id: img.id, imageUrl: img.image_url })}
+                          style={{ background: theme.white, color: theme.red, border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                    </div>
+                    <span style={{ position: 'absolute', top: '8px', left: '8px', background: theme.gold, color: '#fff', fontSize: '10px', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>LIVE</span>
+                  </motion.div>
                 ))}
-              </div>
-            </>
-          )}
-        </div>
 
-        {/* زر حفظ التغييرات والرفع */}
-        {(desktopImages.length > 0 || mobileImages.length > 0) && (
-          <button 
-            type="submit" 
-            disabled={uploadMutation.isPending}
-            style={styles.submitBtn}
-          >
-            {uploadMutation.isPending ? 'Saving New Changes...' : 'Save & Publish New Images'}
-          </button>
-        )}
+                {/* Pending Previews */}
+                {sec.pending.map((img) => (
+                  <motion.div 
+                    initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
+                    key={img.id} style={{ position: 'relative', height: '120px', borderRadius: '12px', overflow: 'hidden', border: `2px dashed ${theme.gold}` }}
+                  >
+                    <img src={img.preview} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="Preview" />
+                    <button 
+                      type="button" onClick={() => sec.setter(prev => prev.filter(i => i.id !== img.id))}
+                      style={{ position: 'absolute', top: '8px', right: '8px', background: theme.black, color: '#fff', border: 'none', borderRadius: '50%', padding: '4px', cursor: 'pointer' }}
+                    >
+                      <X size={14} />
+                    </button>
+                    <span style={{ position: 'absolute', bottom: '8px', left: '8px', color: theme.black, fontSize: '10px', fontWeight: '800' }}>READY</span>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+            
+            {sec.live.length === 0 && sec.pending.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '40px', border: '1px dashed #ddd', borderRadius: '12px' }}>
+                <ImageIcon size={32} style={{ color: '#ccc', marginBottom: '10px' }} />
+                <p style={{ color: '#999', fontSize: '13px' }}>No banners set for this layout</p>
+              </div>
+            )}
+          </section>
+        ))}
+
+        {/* Global Action Button */}
+        <AnimatePresence>
+          {(desktopImages.length > 0 || mobileImages.length > 0) && (
+            <motion.div 
+              initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }}
+              style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}
+            >
+              <button 
+                type="submit" disabled={uploadMutation.isPending}
+                style={{ 
+                  background: theme.black, color: theme.white, border: 'none',
+                  padding: '16px 40px', borderRadius: '50px', fontSize: '15px', fontWeight: '700',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.3)', cursor: 'pointer',
+                  display: 'flex', alignItems: 'center', gap: '12px', transition: '0.3s'
+                }}
+              >
+                {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <UploadCloud size={20} />}
+                {uploadMutation.isPending ? 'PUBLISHING...' : 'SAVE & PUBLISH CHANGES'}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </form>
-    </div>
+
+      {/* Hover Effects CSS */}
+      <style>{`
+        .hover-overlay:hover { opacity: 1 !important; }
+        label:hover { background: #000; color: #fff; }
+        button:active { scale: 0.95; }
+      `}</style>
+    </motion.div>
   );
 };
 
