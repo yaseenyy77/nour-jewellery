@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { supabase } from '../../../../supabaseClient';
-import { useMutation, useQueryClient } from '@tanstack/react-query'; // استيراد أدوات ريئاكت كويري
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
   
-  // الـ Query Client المسؤول عن التحكم في الكاش وتحديثه
   const queryClient = useQueryClient();
 
   const handleDesktopChange = (e) => {
@@ -39,72 +38,61 @@ const Appearance = () => {
     setMobileImages(prev => prev.filter(img => img.id !== id));
   };
 
-  // إعداد الـ Mutation الخاص برفع الصور وحفظها
   const uploadMutation = useMutation({
     mutationFn: async () => {
       const uploadAndSaveImage = async (imageFile, deviceType) => {
         const fileExt = imageFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
+        const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
         const filePath = `${deviceType}/${fileName}`;
 
-        // 1. رفع الصورة لـ Supabase Storage Bucket
+        // 1. رفع الصورة للـ Bucket
         const { error: uploadError } = await supabase.storage
           .from('appearance_images')
           .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
-        // 2. جلب رابط الصورة العام
+        // 2. جلب الرابط العام
         const { data: { publicUrl } } = supabase.storage
           .from('appearance_images')
           .getPublicUrl(filePath);
 
-        // 3. حفظ الرابط ونوع الجهاز في جدول قاعدة البيانات
+        // 3. الحفظ في قاعدة البيانات
         const { error: dbError } = await supabase
           .from('hero_sliders')
-          .insert([
-            { image_url: publicUrl, device_type: deviceType }
-          ]);
+          .insert([{ image_url: publicUrl, device_type: deviceType }]);
 
         if (dbError) throw dbError;
       };
 
-      // تنفيذ الرفع لكل الصور المختارة متتالياً
-      for (const img of desktopImages) {
-        await uploadAndSaveImage(img.file, 'desktop');
-      }
+      const uploadPromises = [];
+      for (const img of desktopImages) uploadPromises.push(uploadAndSaveImage(img.file, 'desktop'));
+      for (const img of mobileImages) uploadPromises.push(uploadAndSaveImage(img.file, 'mobile'));
 
-      for (const img of mobileImages) {
-        await uploadAndSaveImage(img.file, 'mobile');
-      }
+      await Promise.all(uploadPromises);
     },
     onSuccess: () => {
-      // هنا السحر! بنقول لريئاكت كويري اعملي تحديث فوراً للسلايدر
       queryClient.invalidateQueries({ queryKey: ['hero-sliders'] });
-      
       alert('تم رفع وحفظ الصور بنجاح والتحديث فوري!');
       setDesktopImages([]);
       setMobileImages([]);
     },
     onError: (error) => {
       console.error('Upload Error:', error);
-      alert(`حصل خطأ أثناء الرفع: ${error.message || 'تأكد من إعدادات سوبابيس'}`);
+      alert(`حصل خطأ أثناء الرفع: ${error.message}`);
     }
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
     if (desktopImages.length === 0 && mobileImages.length === 0) {
       alert("من فضلك اختر صورة واحدة على الأقل!");
       return;
     }
-
-    // تشغيل عملية الرفع
     uploadMutation.mutate();
   };
 
-  // ================= STYLES (كما هي بدون تغيير) =================
+  // ================= STYLES =================
   const containerStyle = { maxWidth: '900px', margin: '40px auto', padding: '40px', backgroundColor: '#ffffff', border: '1px solid #e5e5e5', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#000000', direction: 'ltr', textAlign: 'left' };
   const headerStyle = { borderBottom: '2px solid #000000', paddingBottom: '20px', marginBottom: '32px' };
   const sectionStyle = { marginBottom: '40px', padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' };
@@ -127,20 +115,14 @@ const Appearance = () => {
           
           <label style={uploadBtnStyle}>
             + Add Desktop Image
-            <input type="file" accept="image/*" multiple onChange={handleDesktopChange} style={{ display: 'none' }} />
+            <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" multiple onChange={handleDesktopChange} style={{ display: 'none' }} />
           </label>
 
           <div style={gridStyle}>
             {desktopImages.map((img) => (
               <div key={img.id} style={previewContainerStyle}>
                 <img src={img.preview} alt="Desktop Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <button 
-                  type="button" 
-                  onClick={() => removeDesktopImage(img.id)}
-                  style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: '#000000', color: '#ffffff', border: 'none', width: '22px', height: '22px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  X
-                </button>
+                <button type="button" onClick={() => removeDesktopImage(img.id)} style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: '#000000', color: '#ffffff', border: 'none', width: '22px', height: '22px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
               </div>
             ))}
           </div>
@@ -152,30 +134,20 @@ const Appearance = () => {
           
           <label style={uploadBtnStyle}>
             + Add Mobile Image
-            <input type="file" accept="image/*" multiple onChange={handleMobileChange} style={{ display: 'none' }} />
+            <input type="file" accept="image/png, image/jpeg, image/jpg, image/webp" multiple onChange={handleMobileChange} style={{ display: 'none' }} />
           </label>
 
           <div style={gridStyle}>
             {mobileImages.map((img) => (
               <div key={img.id} style={previewContainerStyle}>
                 <img src={img.preview} alt="Mobile Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                <button 
-                  type="button" 
-                  onClick={() => removeMobileImage(img.id)}
-                  style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: '#000000', color: '#ffffff', border: 'none', width: '22px', height: '22px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                >
-                  X
-                </button>
+                <button type="button" onClick={() => removeMobileImage(img.id)} style={{ position: 'absolute', top: '4px', right: '4px', backgroundColor: '#000000', color: '#ffffff', border: 'none', width: '22px', height: '22px', fontSize: '11px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>X</button>
               </div>
             ))}
           </div>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={uploadMutation.isPending}
-          style={submitBtnStyle}
-        >
+        <button type="submit" disabled={uploadMutation.isPending} style={submitBtnStyle}>
           {uploadMutation.isPending ? 'UPLOADING...' : 'SAVE CHANGES'}
         </button>
       </form>

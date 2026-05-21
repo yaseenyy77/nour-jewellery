@@ -15,12 +15,11 @@ const HeroSlider = () => {
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
+    handleResize(); // التشغيل أول مرة
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // جلب البيانات مع إضافة حماية في حالة الفشل
   const { data: sliders, isLoading, isError } = useQuery({
     queryKey: ['hero-sliders'],
     queryFn: fetchSliders,
@@ -28,15 +27,12 @@ const HeroSlider = () => {
     retry: 1,
   });
 
-  // التأكد من أن sliders عبارة عن مصفوفة دائماً لتجنب ضرب الشاشة البيضاء
   const safeSliders = Array.isArray(sliders) ? sliders : [];
 
-  // فلترة الصور حسب نوع الشاشة
   const activeSlides = safeSliders.filter(
     (slider) => slider && slider.device_type === (isMobile ? 'mobile' : 'desktop')
   );
 
-  // 1. حالة التحميل
   if (isLoading) {
     return (
       <div className="w-full h-[400px] md:h-[500px] bg-gray-100 animate-pulse flex items-center justify-center text-gray-400">
@@ -45,7 +41,6 @@ const HeroSlider = () => {
     );
   }
 
-  // 2. حالة الخطأ أو عدم وجود صور (تمنع الشاشة البيضاء وتظهر لوحة بديلة أنيقة)
   if (isError || activeSlides.length === 0) {
     return (
       <div className="w-full h-[400px] md:h-[500px] bg-neutral-900 flex flex-col items-center justify-center text-white p-6 text-center">
@@ -62,7 +57,7 @@ const HeroSlider = () => {
       <Swiper
         modules={[Navigation, Autoplay, Pagination]}
         slidesPerView={1}
-        loop={activeSlides.length > 1} // لا يعمل Loop إلا إذا كان هناك أكثر من صورة
+        loop={activeSlides.length > 1}
         autoplay={activeSlides.length > 1 ? { delay: 4000, disableOnInteraction: false } : false}
         onBeforeInit={(swiper) => {
           swiperRef.current = swiper;
@@ -83,7 +78,6 @@ const HeroSlider = () => {
         ))}
       </Swiper>
 
-      {/* الأسهم تظهر فقط لو يوجد أكثر من صورة */}
       {activeSlides.length > 1 && (
         <>
           <button 
