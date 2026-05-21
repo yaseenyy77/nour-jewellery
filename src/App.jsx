@@ -42,20 +42,35 @@ function App() {
       <Routes>
         {/* مسار لوحة التحكم */}
         <Route path="/admin" element={<AdminLayout />}>
+          
           {/* الإحصائيات */}
-          <Route path="overview" element={<div>Products Table Page</div>} />
+          <Route path="overview" element={<></>} />
+          <Route path="overview/stats" element={<div>Stats Page</div>} />
+          <Route path="overview/charts" element={<div>Charts Page</div>} />
+          
+          {/* 🔴 المنتجات (هنا كان النقص اللي بيسبب خروجك من الداش بورد) */}
+          <Route path="products" element={<></>} />
+          <Route path="products/table" element={<div>Products Table Page</div>} />
+          <Route path="products/add" element={<div>Add Product Page</div>} />
+          <Route path="products/categories" element={<div>Categories Page</div>} />
           
           {/* الطلبات */}
-          <Route path="orders" element={<div>Orders Grid</div>} />
+          <Route path="orders" element={<></>} />
+          <Route path="orders/list" element={<div>Orders List</div>} />
+          <Route path="orders/details" element={<div>Order Details</div>} />
+          <Route path="orders/shipping" element={<div>Shipping Info</div>} />
           
           {/* العملاء */}
-          <Route path="customers" element={<div>Clients Grid</div>} />
+          <Route path="customers" element={<></>} />
+          <Route path="customers/list" element={<div>Customers List</div>} />
+          <Route path="customers/roles" element={<div>Admin Roles</div>} />
           
           {/* الإعدادات والربط المطلوب */}
-          <Route path="settings" element={<div>Settings Grid</div>} />
+          <Route path="settings" element={<></>} />
           <Route path="settings/appearance" element={<Appearance />} /> 
           <Route path="settings/general" element={<div>General Settings Page</div>} />
           <Route path="settings/payment" element={<div>Payment Settings Page</div>} />
+          
         </Route>
 
         {/* مسارات الموقع الرئيسي */}
