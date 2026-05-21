@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { supabase } from '../../../../supabaseClient'; // تم التصحيح لخطوة واحدة لورا
+import { supabase } from '../../../../supabaseClient';
+import { useMutation, useQueryClient } from '@tanstack/react-query'; // استيراد أدوات ريئاكت كويري
 
 const Appearance = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
+  
+  // الـ Query Client المسؤول عن التحكم في الكاش وتحديثه
+  const queryClient = useQueryClient();
 
   const handleDesktopChange = (e) => {
     const files = Array.from(e.target.files);
@@ -36,32 +39,27 @@ const Appearance = () => {
     setMobileImages(prev => prev.filter(img => img.id !== id));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (desktopImages.length === 0 && mobileImages.length === 0) {
-      alert("من فضلك اختر صورة واحدة على الأقل!");
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
+  // إعداد الـ Mutation الخاص برفع الصور وحفظها
+  const uploadMutation = useMutation({
+    mutationFn: async () => {
       const uploadAndSaveImage = async (imageFile, deviceType) => {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `${Math.random()}.${fileExt}`;
         const filePath = `${deviceType}/${fileName}`;
 
+        // 1. رفع الصورة لـ Supabase Storage Bucket
         const { error: uploadError } = await supabase.storage
           .from('appearance_images')
           .upload(filePath, imageFile);
 
         if (uploadError) throw uploadError;
 
+        // 2. جلب رابط الصورة العام
         const { data: { publicUrl } } = supabase.storage
           .from('appearance_images')
           .getPublicUrl(filePath);
 
+        // 3. حفظ الرابط ونوع الجهاز في جدول قاعدة البيانات
         const { error: dbError } = await supabase
           .from('hero_sliders')
           .insert([
@@ -71,6 +69,7 @@ const Appearance = () => {
         if (dbError) throw dbError;
       };
 
+      // تنفيذ الرفع لكل الصور المختارة متتالياً
       for (const img of desktopImages) {
         await uploadAndSaveImage(img.file, 'desktop');
       }
@@ -78,85 +77,41 @@ const Appearance = () => {
       for (const img of mobileImages) {
         await uploadAndSaveImage(img.file, 'mobile');
       }
-
-      alert('تم رفع وحفظ الصور بنجاح!');
+    },
+    onSuccess: () => {
+      // هنا السحر! بنقول لريئاكت كويري اعملي تحديث فوراً للسلايدر
+      queryClient.invalidateQueries({ queryKey: ['hero-sliders'] });
+      
+      alert('تم رفع وحفظ الصور بنجاح والتحديث فوري!');
       setDesktopImages([]);
       setMobileImages([]);
-
-    } catch (error) {
+    },
+    onError: (error) => {
       console.error('Upload Error:', error);
-      alert('حصل خطأ أثناء الرفع، تأكد من إعدادات سوبابيس والاتصال بالإنترنت.');
-    } finally {
-      setIsUploading(false);
+      alert(`حصل خطأ أثناء الرفع: ${error.message || 'تأكد من إعدادات سوبابيس'}`);
     }
+  });
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (desktopImages.length === 0 && mobileImages.length === 0) {
+      alert("من فضلك اختر صورة واحدة على الأقل!");
+      return;
+    }
+
+    // تشغيل عملية الرفع
+    uploadMutation.mutate();
   };
 
-  // ================= STYLES =================
-  const containerStyle = {
-    maxWidth: '900px',
-    margin: '40px auto',
-    padding: '40px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e5e5',
-    fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-    color: '#000000',
-    direction: 'ltr',
-    textAlign: 'left'
-  };
-
-  const headerStyle = {
-    borderBottom: '2px solid #000000',
-    paddingBottom: '20px',
-    marginBottom: '32px'
-  };
-
-  const sectionStyle = {
-    marginBottom: '40px',
-    padding: '24px',
-    border: '1px solid #e5e5e5',
-    backgroundColor: '#fafafa'
-  };
-
-  const uploadBtnStyle = {
-    display: 'inline-block',
-    padding: '12px 20px',
-    backgroundColor: '#000000',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontWeight: '500',
-    cursor: 'pointer',
-    textAlign: 'center',
-    transition: 'background-color 0.2s'
-  };
-
-  const gridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))',
-    gap: '16px',
-    marginTop: '20px'
-  };
-
-  const previewContainerStyle = {
-    position: 'relative',
-    width: '120px',
-    height: '120px',
-    border: '1px solid #e5e5e5',
-    backgroundColor: '#ffffff',
-    overflow: 'hidden'
-  };
-
-  const submitBtnStyle = {
-    width: '100%',
-    padding: '16px',
-    backgroundColor: isUploading ? '#cccccc' : '#000000',
-    color: '#ffffff',
-    border: 'none',
-    fontSize: '16px',
-    fontWeight: '600',
-    letterSpacing: '0.5px',
-    cursor: isUploading ? 'not-allowed' : 'pointer',
-    transition: 'background-color 0.2s'
-  };
+  // ================= STYLES (كما هي بدون تغيير) =================
+  const containerStyle = { maxWidth: '900px', margin: '40px auto', padding: '40px', backgroundColor: '#ffffff', border: '1px solid #e5e5e5', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', color: '#000000', direction: 'ltr', textAlign: 'left' };
+  const headerStyle = { borderBottom: '2px solid #000000', paddingBottom: '20px', marginBottom: '32px' };
+  const sectionStyle = { marginBottom: '40px', padding: '24px', border: '1px solid #e5e5e5', backgroundColor: '#fafafa' };
+  const uploadBtnStyle = { display: 'inline-block', padding: '12px 20px', backgroundColor: '#000000', color: '#ffffff', fontSize: '14px', fontWeight: '500', cursor: 'pointer', textAlign: 'center', transition: 'background-color 0.2s' };
+  const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 1fr))', gap: '16px', marginTop: '20px' };
+  const previewContainerStyle = { position: 'relative', width: '120px', height: '120px', border: '1px solid #e5e5e5', backgroundColor: '#ffffff', overflow: 'hidden' };
+  const submitBtnStyle = { width: '100%', padding: '16px', backgroundColor: uploadMutation.isPending ? '#cccccc' : '#000000', color: '#ffffff', border: 'none', fontSize: '16px', fontWeight: '600', letterSpacing: '0.5px', cursor: uploadMutation.isPending ? 'not-allowed' : 'pointer', transition: 'background-color 0.2s' };
 
   return (
     <div style={containerStyle}>
@@ -166,7 +121,6 @@ const Appearance = () => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        
         <div style={sectionStyle}>
           <h3 style={{ fontSize: '16px', fontWeight: '600', textTransform: 'uppercase', margin: '0 0 8px 0' }}>Desktop Layout Images</h3>
           <p style={{ fontSize: '12px', color: '#666666', margin: '0 0 16px 0' }}>Will be displayed only on large screens and monitors.</p>
@@ -219,12 +173,11 @@ const Appearance = () => {
 
         <button 
           type="submit" 
-          disabled={isUploading}
+          disabled={uploadMutation.isPending}
           style={submitBtnStyle}
         >
-          {isUploading ? 'UPLOADING...' : 'SAVE CHANGES'}
+          {uploadMutation.isPending ? 'UPLOADING...' : 'SAVE CHANGES'}
         </button>
-
       </form>
     </div>
   );
