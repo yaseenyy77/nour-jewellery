@@ -8,7 +8,6 @@ import {
   Settings2, CreditCard, Palette
 } from 'lucide-react';
 
-// هيكل الداش بورد: المفتاح هو المسار الرئيسي، والقيمة هي العناوين والأزرار الفرعية
 const dashboardStructure = {
   '/admin/overview': { title: 'DASHBOARD', files: [
     { name: 'STATS', icon: <BarChart3 />, path: '/admin/overview/stats' },
@@ -31,29 +30,33 @@ const dashboardStructure = {
   '/admin/settings': { title: 'CONFIG', files: [
     { name: 'BASE', icon: <Settings2 />, path: '/admin/settings/general' },
     { name: 'PAY', icon: <CreditCard />, path: '/admin/settings/payment' },
-    { name: 'UI', icon: <Palette />, path: '/admin/settings/appearance' }, // الزرار ده مربوط بمسار الأبيرنس
+    { name: 'UI', icon: <Palette />, path: '/admin/settings/appearance' },
   ]}
 };
 
 const AdminLayout = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
-  
-  // التحقق إذا كان المسار الحالي هو مجلد رئيسي يعرض أيقونات أم صفحة داخلية
   const currentCategory = dashboardStructure[location.pathname];
 
   return (
-    <div className="min-h-screen bg-[#fcfcfc] flex flex-col font-sans" dir="ltr">
-      {/* شريط التنقل العلوي */}
-      <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+    // خلينا الحاوية الأساسية فليكس ومفيش سكرول هنا
+    <div className="min-h-screen bg-[#fcfcfc] font-sans" dir="ltr">
       
-      <div className="flex flex-1 overflow-hidden">
-        {/* القائمة الجانبية */}
-        <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      {/* السايد بار ثابت 
+      */}
+      <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      
+      {/* السر هنا: المساحة الفاضية للسايد بار (lg:pl-64)
+        والمحتوى جواه بيفليكس عشان ياخد باقي الشاشة 
+      */}
+      <div className="flex flex-col min-h-screen transition-all duration-300 lg:pl-64">
         
-        <main className="flex-1 p-4 md:p-12 overflow-y-auto transition-all">
+        <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
+        
+        {/* المحتوى بياخد الـ padding الخاص بيه */}
+        <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-x-hidden">
           {currentCategory ? (
-            /* لو إحنا في المسار الرئيسي زي /admin/settings، اعرض الأيقونات */
             <div className="animate-in fade-in zoom-in-95 duration-500">
               <div className="mb-8">
                 <h2 className="text-xl md:text-3xl font-black tracking-tight text-black flex items-center gap-3">
@@ -85,7 +88,6 @@ const AdminLayout = () => {
               </div>
             </div>
           ) : (
-            /* لو دخلت جوا مسار فرعي زي /admin/settings/appearance، اعرض الصفحة بجانب السايد بار */
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                <Outlet />
             </div>
