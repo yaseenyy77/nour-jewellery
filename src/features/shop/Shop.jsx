@@ -98,4 +98,4 @@ const Shop = () => {
   );
 };
 
-export default Shop;git add .
+export default Shop;
