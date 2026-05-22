@@ -5,6 +5,9 @@ import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
 
+// استيراد الشوب
+import Shop from './features/shop/Shop';
+
 // استيراد مكونات لوحة التحكم
 import AdminLayout from './dashboard/layout/AdminLayout'; 
 import Appearance from './dashboard/features/settings/Appearance'; 
@@ -14,63 +17,44 @@ function App() {
   const footerRef = useRef(null);
 
   useEffect(() => {
-    // تم تصحيح القوس هنا ([entry]) ليكون السنتاكس سليماً تماماً
     const observer = new IntersectionObserver(
       ([entry]) => {
         setShowBottomNav(!entry.isIntersecting);
       },
-      { 
-        root: null, 
-        rootMargin: '0px 0px -50px 0px', 
-        threshold: 0 
-      }
+      { root: null, rootMargin: '0px 0px -50px 0px', threshold: 0 }
     );
 
-    if (footerRef.current) {
-      observer.observe(footerRef.current);
-    }
-
-    return () => {
-      if (footerRef.current) {
-        observer.unobserve(footerRef.current);
-      }
-    };
+    if (footerRef.current) observer.observe(footerRef.current);
+    return () => { if (footerRef.current) observer.unobserve(footerRef.current); };
   }, []);
 
   return (
     <Router>
       <Routes>
-        {/* مسار لوحة التحكم */}
+        {/* مسارات لوحة التحكم */}
         <Route path="/admin" element={<AdminLayout />}>
-          
-          {/* الإحصائيات */}
           <Route path="overview" element={<></>} />
           <Route path="overview/stats" element={<div>Stats Page</div>} />
           <Route path="overview/charts" element={<div>Charts Page</div>} />
           
-          {/* 🔴 المنتجات (هنا كان النقص اللي بيسبب خروجك من الداش بورد) */}
           <Route path="products" element={<></>} />
           <Route path="products/table" element={<div>Products Table Page</div>} />
           <Route path="products/add" element={<div>Add Product Page</div>} />
           <Route path="products/categories" element={<div>Categories Page</div>} />
           
-          {/* الطلبات */}
           <Route path="orders" element={<></>} />
           <Route path="orders/list" element={<div>Orders List</div>} />
           <Route path="orders/details" element={<div>Order Details</div>} />
           <Route path="orders/shipping" element={<div>Shipping Info</div>} />
           
-          {/* العملاء */}
           <Route path="customers" element={<></>} />
           <Route path="customers/list" element={<div>Customers List</div>} />
           <Route path="customers/roles" element={<div>Admin Roles</div>} />
           
-          {/* الإعدادات والربط المطلوب */}
           <Route path="settings" element={<></>} />
           <Route path="settings/appearance" element={<Appearance />} /> 
           <Route path="settings/general" element={<div>General Settings Page</div>} />
           <Route path="settings/payment" element={<div>Payment Settings Page</div>} />
-          
         </Route>
 
         {/* مسارات الموقع الرئيسي */}
@@ -82,6 +66,11 @@ function App() {
               <main className="pb-20">
                 <Routes>
                   <Route path="/" element={<Home />} />
+                  
+                  {/* مسارات الشوب الذكية */}
+                  <Route path="/shop" element={<Shop />} />
+                  <Route path="/shop/:brandParam" element={<Shop />} />
+                  <Route path="/shop/:brandParam/:categoryParam" element={<Shop />} />
                 </Routes>
               </main>
               <div ref={footerRef}>
