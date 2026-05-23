@@ -1,7 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-const categories = ['necklaces', 'rings', 'bracelets', 'earrings', 'bangles'];
+// 4 أقسام فقط كما طلبت
+const categories = ['necklaces', 'rings', 'bracelets', 'earrings'];
 
 const CategoryTabs = ({ activeBrand, activeCategory, onCategoryChange }) => {
   return (
@@ -9,14 +10,14 @@ const CategoryTabs = ({ activeBrand, activeCategory, onCategoryChange }) => {
       <div className="max-w-[1400px] mx-auto px-4 flex justify-start lg:justify-center overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex items-center gap-8 md:gap-16 min-w-max">
           
-          {/* زر عرض الكل */}
+          {/* زر التشكيلة الكاملة للبراند */}
           <TabButton 
             label={`${activeBrand} COLLECTION`} 
             isActive={activeCategory === 'all'} 
             onClick={() => onCategoryChange('all')} 
           />
           
-          {/* باقي الأقسام */}
+          {/* الـ 4 أقسام الفرعية */}
           {categories.map((cat) => (
             <TabButton 
               key={cat} 
@@ -31,7 +32,6 @@ const CategoryTabs = ({ activeBrand, activeCategory, onCategoryChange }) => {
   );
 };
 
-// مكون فرعي للزر عشان الكود يبقى أنظف ونطبق الأنيميشن عليه
 const TabButton = ({ label, isActive, onClick }) => (
   <button 
     onClick={onClick}
@@ -43,7 +43,6 @@ const TabButton = ({ label, isActive, onClick }) => (
       {label}
     </span>
     
-    {/* خط الأنيميشن الفخم */}
     {isActive && (
       <motion.div 
         layoutId="activeTab" 

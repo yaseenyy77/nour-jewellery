@@ -12,12 +12,10 @@ const Shop = () => {
   const { brandParam, categoryParam } = useParams();
   const navigate = useNavigate();
 
-  // الحالات الأساسية لعناصر العرض والترتيب
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [gridCols, setGridCols] = useState(4); 
   const [sortBy, setSortBy] = useState('featured');
   
-  // حالات الفلاتر الفرعية المتقدمة
   const [maxPrice, setMaxPrice] = useState(400000);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedColors, setSelectedColors] = useState([]);
@@ -26,7 +24,6 @@ const Shop = () => {
   const currentBrand = brandParam || 'KLEO';
   const currentCategory = categoryParam || 'all';
 
-  // إعادة ضبط الفلاتر الفرعية تلقائياً عند تغيير البراند أو القسم لمنع حدوث تعارض بالبيانات
   useEffect(() => {
     setSelectedTypes([]);
     setSelectedColors([]);
@@ -45,7 +42,7 @@ const Shop = () => {
     setAvailability('all');
   };
 
-  // محرك تصفية المنتجات الحقيقي والذكي
+  // محرك التصفية الفعال
   const filteredProducts = (dummyProducts || []).filter((product) => {
     const matchesBrand = product.brand?.toUpperCase() === currentBrand.toUpperCase();
     const matchesCategory = currentCategory === 'all' || product.category?.toLowerCase() === currentCategory.toLowerCase();
@@ -60,7 +57,7 @@ const Shop = () => {
     return matchesBrand && matchesCategory && matchesPrice && matchesType && matchesColor && matchesAvailability;
   });
 
-  // فرز وترتيب المنتجات حسب رغبة المستخدم
+  // محرك الترتيب
   const sortedProducts = [...filteredProducts].sort((a, b) => {
     if (sortBy === 'price-low') return a.price - b.price;
     if (sortBy === 'price-high') return b.price - a.price;
@@ -70,61 +67,44 @@ const Shop = () => {
 
   return (
     <motion.div 
-      initial={{ opacity: 0 }} 
-      animate={{ opacity: 1 }} 
-      exit={{ opacity: 0 }}
-      className="w-full min-h-screen bg-[#ffffff] pb-32" 
-      dir="ltr"
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="w-full min-h-screen bg-white pb-32" dir="ltr"
     >
-      {/* 1. شريط الأقسام العلوي والمثبت */}
       <CategoryTabs 
         activeBrand={currentBrand} 
         activeCategory={currentCategory} 
         onCategoryChange={handleCategoryChange} 
       />
       
-      <div className="max-w-[1400px] mx-auto px-6 mt-6">
-        
-        {/* 2. شريط تحكم الفلاتر والترتيب */}
+      <div className="max-w-[1400px] mx-auto px-6 mt-10">
         <ControlBar 
-          isFilterOpen={isFilterOpen} 
-          setIsFilterOpen={setIsFilterOpen} 
-          gridCols={gridCols} 
-          setGridCols={setGridCols} 
-          sortBy={sortBy} 
-          setSortBy={setSortBy} 
+          isFilterOpen={isFilterOpen} setIsFilterOpen={setIsFilterOpen} 
+          gridCols={gridCols} setGridCols={setGridCols} 
+          sortBy={sortBy} setSortBy={setSortBy} 
         />
         
-        {/* 3. لوحة الفلاتر المنسدلة المخصصة بالكامل */}
         <FilterPanel 
           isOpen={isFilterOpen} 
-          maxPrice={maxPrice} 
-          setMaxPrice={setMaxPrice} 
-          selectedTypes={selectedTypes} 
-          setSelectedTypes={setSelectedTypes} 
-          selectedColors={selectedColors} 
-          setSelectedColors={setSelectedColors} 
-          availability={availability} 
-          setAvailability={setAvailability} 
-          onResetFilters={handleResetFilters} 
-          totalResults={sortedProducts.length} 
+          maxPrice={maxPrice} setMaxPrice={setMaxPrice} 
+          selectedTypes={selectedTypes} setSelectedTypes={setSelectedTypes} 
+          selectedColors={selectedColors} setSelectedColors={setSelectedColors} 
+          availability={availability} setAvailability={setAvailability} 
+          onResetFilters={handleResetFilters} totalResults={sortedProducts.length} 
         />
 
-        {/* 4. شبكة عرض المنتجات أو واجهة خلو المنتجات */}
         {sortedProducts.length > 0 ? (
           <ShopProductGrid products={sortedProducts} gridCols={gridCols} />
         ) : (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="w-full py-32 text-center border border-dashed border-gray-100 bg-[#fafafa]"
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+            className="w-full py-40 text-center border border-gray-100 bg-[#fafafa] flex flex-col items-center justify-center"
           >
-            <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
-              No luxury pieces match your current filters.
+            <p className="text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase">
+              No pieces match your current selection.
             </p>
             <button 
               onClick={handleResetFilters}
-              className="mt-6 text-[10px] font-bold tracking-widest uppercase bg-black text-white px-8 py-3.5 hover:bg-neutral-800 transition-colors duration-300"
+              className="mt-8 text-[10px] font-bold tracking-[0.2em] uppercase bg-black text-white px-8 py-4 hover:bg-neutral-800 transition-colors"
             >
               Reset All Filters
             </button>
