@@ -1,51 +1,104 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SlidersHorizontal, ChevronDown } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ControlBar = ({ isFilterOpen, setIsFilterOpen, gridCols, setGridCols, sortBy, setSortBy }) => {
+  const [isSortOpen, setIsSortOpen] = useState(false);
+
+  const sortOptions = [
+    { value: 'featured', label: 'Featured' },
+    { value: 'best-selling', label: 'Best Selling' },
+    { value: 'price-low', label: 'Price: Low to High' },
+    { value: 'price-high', label: 'Price: High to Low' },
+    { value: 'newest', label: 'Date: New to Old' }
+  ];
+
+  const currentSortLabel = sortOptions.find(opt => opt.value === sortBy)?.label || 'Featured';
+
   const renderGridIcon = (cols, isActive) => (
-    <div className="flex gap-[2px] h-4 cursor-pointer items-end hover:opacity-70 transition-opacity" onClick={() => setGridCols(cols)}>
+    <div 
+      className="flex gap-[3px] h-3.5 cursor-pointer items-center group/icon" 
+      onClick={() => setGridCols(cols)}
+    >
       {[...Array(cols)].map((_, i) => (
-        <div key={i} className={`w-1.5 transition-all duration-300 ${isActive ? 'bg-black h-full' : 'bg-gray-300 h-2.5'}`}></div>
+        <div 
+          key={i} 
+          className={`w-[3px] transition-all duration-300 ${
+            isActive ? 'bg-black h-full' : 'bg-gray-200 h-3 group-hover/icon:bg-gray-400'
+          }`}
+        ></div>
       ))}
     </div>
   );
 
   return (
-    <div className="flex flex-wrap items-center justify-between py-4 md:py-6 border-b border-gray-100 mb-6 md:mb-10 gap-y-4">
+    <div className="flex items-center justify-between py-5 border-b border-gray-100 mb-8 md:mb-12 gap-4 relative z-20">
       
-      {/* زر الفلتر */}
+      {/* زر الفلتر الفاخر */}
       <button 
         onClick={() => setIsFilterOpen(!isFilterOpen)}
-        className="flex items-center gap-2 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase hover:text-gray-500 transition-colors order-1"
+        className="flex items-center gap-2.5 text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase text-black border border-black px-4 py-2 hover:bg-black hover:text-white transition-all duration-300"
       >
-        <SlidersHorizontal size={14} strokeWidth={1.5} className="md:w-4 md:h-4" />
-        {isFilterOpen ? 'Hide Filter' : 'Filter'}
+        <SlidersHorizontal size={12} strokeWidth={2} />
+        <span>{isFilterOpen ? 'Hide Filters' : 'Filter & Sort'}</span>
       </button>
 
-      {/* ترتيب المنتجات - تظهر على اليمين في الموبايل */}
-      <div className="relative order-2 md:order-3">
-        <select 
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="appearance-none bg-transparent text-[9px] md:text-[11px] font-bold tracking-[0.15em] uppercase py-2 pl-2 pr-8 cursor-pointer focus:outline-none text-right md:text-left"
-        >
-          <option value="featured">Featured</option>
-          <option value="best-selling">Best Selling</option>
-          <option value="price-low">Price, low to high</option>
-          <option value="price-high">Price, high to low</option>
-          <option value="newest">Date, new to old</option>
-        </select>
-        <ChevronDown size={12} className="absolute right-0 md:right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
-      </div>
+      {/* الـ Controls اليمين */}
+      <div className="flex items-center gap-8">
+        
+        {/* تحجيم الشبكة (يختفي على الموبايل لثبات العرض) */}
+        <div className="hidden md:flex items-center gap-4 border-r border-gray-100 pr-8">
+          {renderGridIcon(2, gridCols === 2)}
+          {renderGridIcon(3, gridCols === 3)}
+          {renderGridIcon(4, gridCols === 4)}
+        </div>
 
-      {/* التحكم في الأعمدة - يختفي في الموبايل عشان الموبايل ثابت عمودين */}
-      <div className="hidden md:flex items-center gap-5 lg:gap-8 order-3 md:order-2 absolute left-1/2 -translate-x-1/2">
-        {renderGridIcon(2, gridCols === 2)}
-        {renderGridIcon(3, gridCols === 3)}
-        {renderGridIcon(4, gridCols === 4)}
-        {renderGridIcon(5, gridCols === 5)}
+        {/* قائمة الترتيب المخصصة الاحترافية (Custom Sort Dropdown) */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsSortOpen(!isSortOpen)}
+            className="flex items-center gap-2 text-[10px] md:text-xs font-semibold tracking-[0.2em] uppercase text-black py-2 focus:outline-none"
+          >
+            <span className="text-gray-400 font-normal">Sort by:</span>
+            <span>{currentSortLabel}</span>
+            <motion.div animate={{ rotate: isSortOpen ? 180 : 0 }} transition={{ duration: 0.2 }}>
+              <ChevronDown size={12} />
+            </motion.div>
+          </button>
+
+          <AnimatePresence>
+            {isSortOpen && (
+              <>
+                {/* خلفية مخفية لإغلاق القائمة عند الضغط في أي مكان */}
+                <div className="fixed inset-0 z-40" onClick={() => setIsSortOpen(false)} />
+                
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute right-0 mt-2 w-48 bg-white border border-gray-100 shadow-xl z-50 rounded-none py-1"
+                >
+                  {sortOptions.map((opt) => (
+                    <button
+                      key={opt.value}
+                      onClick={() => {
+                        setSortBy(opt.value);
+                        setIsSortOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2.5 text-[11px] font-medium tracking-wider uppercase block hover:bg-gray-50 transition-colors ${
+                        sortBy === opt.value ? 'text-black font-bold bg-gray-50/50' : 'text-gray-500'
+                      }`}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+        </div>
+
       </div>
-      
     </div>
   );
 };

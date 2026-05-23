@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CategoryTabs from './components/CategoryTabs';
@@ -6,92 +6,129 @@ import ControlBar from './components/ControlBar';
 import FilterPanel from './components/FilterPanel';
 import ShopProductGrid from './components/ShopProductGrid';
 
-// استيراد المنتجات
 import { products as dummyProducts } from '../../utils/data';
 
 const Shop = () => {
   const { brandParam, categoryParam } = useParams();
   const navigate = useNavigate();
 
-  // إعدادات الواجهة والترتيب
+  // الحالات الأساسية لعناصر العرض والترتيب
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [gridCols, setGridCols] = useState(4); 
   const [sortBy, setSortBy] = useState('featured');
   
-  // لضمان المزامنة الكاملة مع الـ URL: بنقرا البراند والقسم مباشرة من الرابط
+  // حالات الفلاتر الفرعية المتقدمة
+  const [maxPrice, setMaxPrice] = useState(400000);
+  const [selectedTypes, setSelectedTypes] = useState([]);
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [availability, setAvailability] = useState('all');
+
   const currentBrand = brandParam || 'KLEO';
   const currentCategory = categoryParam || 'all';
 
-  // عند الضغط على أي قسم، بنغير الرابط فوراً
+  // إعادة ضبط الفلاتر الفرعية تلقائياً عند تغيير البراند أو القسم لمنع حدوث تعارض بالبيانات
+  useEffect(() => {
+    setSelectedTypes([]);
+    setSelectedColors([]);
+    setAvailability('all');
+    setMaxPrice(400000);
+  }, [categoryParam, brandParam]);
+
   const handleCategoryChange = (cat) => {
     navigate(`/shop/${currentBrand}/${cat}`, { replace: true });
   };
 
-  // 1️⃣ منطق الفلترة الذكي (Filtering Logic)
+  const handleResetFilters = () => {
+    setMaxPrice(400000);
+    setSelectedTypes([]);
+    setSelectedColors([]);
+    setAvailability('all');
+  };
+
+  // محرك تصفية المنتجات الحقيقي والذكي
   const filteredProducts = (dummyProducts || []).filter((product) => {
-    // التأكد من مطابقة البراند (مثلاً KLEO) مع تجاهل حالة الأحرف كابيتال أو سمول
     const matchesBrand = product.brand?.toUpperCase() === currentBrand.toUpperCase();
-    
-    // التأكد من مطابقة القسم (لو مختار all بيعرض كل البراند، لو مختار rings بيعرض خواتم بس)
     const matchesCategory = currentCategory === 'all' || product.category?.toLowerCase() === currentCategory.toLowerCase();
+    const matchesPrice = (product.price || 0) <= maxPrice;
+    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(product.type);
+    const matchesColor = selectedColors.length === 0 || selectedColors.includes(product.color);
     
-    return matchesBrand && matchesCategory;
+    let matchesAvailability = true;
+    if (availability === 'inStock') matchesAvailability = product.inStock === true || (product.stock > 0);
+    if (availability === 'outOfStock') matchesAvailability = product.inStock === false || (product.stock === 0);
+
+    return matchesBrand && matchesCategory && matchesPrice && matchesType && matchesColor && matchesAvailability;
   });
 
-  // 2️⃣ منطق الترتيب (Sorting Logic) حسب اختيارك من القائمة المنسدلة
+  // فرز وترتيب المنتجات حسب رغبة المستخدم
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'price-low') {
-      return a.price - b.price; // من الأقل سعراً للأعلى
-    }
-    if (sortBy === 'price-high') {
-      return b.price - a.price; // من الأعلى سعراً للأقل
-    }
-    if (sortBy === 'newest') {
-      return b.id - a.id; // الأحدث (بناءً على الـ id)
-    }
-    return 0; // الترتيب الافتراضي (Featured)
+    if (sortBy === 'price-low') return a.price - b.price;
+    if (sortBy === 'price-high') return b.price - a.price;
+    if (sortBy === 'newest') return (b.id || 0) - (a.id || 0);
+    return 0; 
   });
 
   return (
     <motion.div 
       initial={{ opacity: 0 }} 
       animate={{ opacity: 1 }} 
-      transition={{ duration: 0.5 }}
-      className="w-full min-h-screen bg-[#fcfcfc] pt-4 md:pt-8 pb-24" 
+      exit={{ opacity: 0 }}
+      className="w-full min-h-screen bg-[#ffffff] pb-32" 
       dir="ltr"
     >
-      {/* تمرير القيم الحالية لشريط الأقسام */}
+      {/* 1. شريط الأقسام العلوي والمثبت */}
       <CategoryTabs 
         activeBrand={currentBrand} 
         activeCategory={currentCategory} 
         onCategoryChange={handleCategoryChange} 
       />
-
-      <div className="max-w-[1600px] mx-auto px-4 md:px-8 lg:px-12 mt-6 md:mt-10">
+      
+      <div className="max-w-[1400px] mx-auto px-6 mt-6">
+        
+        {/* 2. شريط تحكم الفلاتر والترتيب */}
         <ControlBar 
-          isFilterOpen={isFilterOpen}
-          setIsFilterOpen={setIsFilterOpen}
-          gridCols={gridCols}
-          setGridCols={setGridCols}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
+          isFilterOpen={isFilterOpen} 
+          setIsFilterOpen={setIsFilterOpen} 
+          gridCols={gridCols} 
+          setGridCols={setGridCols} 
+          sortBy={sortBy} 
+          setSortBy={setSortBy} 
+        />
+        
+        {/* 3. لوحة الفلاتر المنسدلة المخصصة بالكامل */}
+        <FilterPanel 
+          isOpen={isFilterOpen} 
+          maxPrice={maxPrice} 
+          setMaxPrice={setMaxPrice} 
+          selectedTypes={selectedTypes} 
+          setSelectedTypes={setSelectedTypes} 
+          selectedColors={selectedColors} 
+          setSelectedColors={setSelectedColors} 
+          availability={availability} 
+          setAvailability={setAvailability} 
+          onResetFilters={handleResetFilters} 
+          totalResults={sortedProducts.length} 
         />
 
-        <FilterPanel isOpen={isFilterOpen} />
-
-        {/* 3️⃣ تمرير المنتجات بعد الفلترة والترتيب مباشرة */}
+        {/* 4. شبكة عرض المنتجات أو واجهة خلو المنتجات */}
         {sortedProducts.length > 0 ? (
-          <ShopProductGrid 
-            products={sortedProducts} 
-            gridCols={gridCols} 
-          />
+          <ShopProductGrid products={sortedProducts} gridCols={gridCols} />
         ) : (
-          // رسالة تظهر بشكل فخم لو القسم ده مفيش فيه منتجات حالياً
-          <div className="w-full py-20 text-center">
-            <p className="text-xs font-bold tracking-[0.2em] text-gray-400 uppercase">
-              No products found in {currentBrand} {currentCategory}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="w-full py-32 text-center border border-dashed border-gray-100 bg-[#fafafa]"
+          >
+            <p className="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
+              No luxury pieces match your current filters.
             </p>
-          </div>
+            <button 
+              onClick={handleResetFilters}
+              className="mt-6 text-[10px] font-bold tracking-widest uppercase bg-black text-white px-8 py-3.5 hover:bg-neutral-800 transition-colors duration-300"
+            >
+              Reset All Filters
+            </button>
+          </motion.div>
         )}
       </div>
     </motion.div>

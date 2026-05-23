@@ -4,9 +4,10 @@ import Header from './components/layout/Header/Header';
 import BottomNav from './components/layout/BottomNav';
 import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
-
-// استيراد الشوب
 import Shop from './features/shop/Shop';
+
+// استيراد المكون الجديد اللي هيطلعنا لأول الصفحة
+import ScrollToTop from './components/ScrollToTop';
 
 // استيراد مكونات لوحة التحكم
 import AdminLayout from './dashboard/layout/AdminLayout'; 
@@ -30,6 +31,9 @@ function App() {
 
   return (
     <Router>
+      {/* المكون ده بيتحط هنا مباشرة جوه الـ Router عشان يشتغل على الموقع كله */}
+      <ScrollToTop />
+      
       <Routes>
         {/* مسارات لوحة التحكم */}
         <Route path="/admin" element={<AdminLayout />}>
