@@ -1,15 +1,126 @@
-// src/utils/data.js
+export const products = [
+  // --- KLEO Collection ---
+  {
+    id: 101,
+    name: "Classic Diamond Eternity Ring",
+    brand: "KLEO",
+    category: "rings",
+    type: "Rings",
+    color: "White Gold",
+    carat: "18K",
+    weight: "4.5g",
+    price: 45000,
+    oldPrice: 50000,
+    discount: true,
+    inStock: true,
+    stock: 5,
+    image: "https://images.unsplash.com/photo-1605100804763-247f66156e55?auto=format&fit=crop&q=80&w=800",
+    description: "A timeless eternity ring featuring brilliant-cut diamonds set in 18K white gold."
+  },
+  {
+    id: 102,
+    name: "Minimalist Gold Chain Necklace",
+    brand: "kleo", // سمول ليتر عشان نتأكد إن الفلترة ذكية
+    category: "necklaces",
+    type: "Necklaces",
+    color: "Yellow Gold",
+    carat: "21K",
+    weight: "8.2g",
+    price: 22000,
+    oldPrice: null,
+    discount: false,
+    inStock: true,
+    stock: 12,
+    image: "https://images.unsplash.com/photo-1599643478514-4a11018c50f2?auto=format&fit=crop&q=80&w=800",
+    description: "Elegant and delicate 21K yellow gold chain, perfect for everyday wear."
+  },
+  {
+    id: 103,
+    name: "Rose Gold Pearl Earrings",
+    brand: "Kleo",
+    category: "earrings",
+    type: "Earrings",
+    color: "Rose Gold",
+    carat: "18K",
+    weight: "3.1g",
+    price: 15500,
+    oldPrice: 18000,
+    discount: true,
+    inStock: false, // Out of stock example
+    stock: 0,
+    image: "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&q=80&w=800",
+    description: "Sophisticated freshwater pearls mounted on 18K rose gold."
+  },
+  {
+    id: 104,
+    name: "Diamond Tennis Bracelet",
+    brand: "KLEO",
+    category: "bracelets",
+    type: "Bracelets",
+    color: "White Gold",
+    carat: "18K",
+    weight: "12.4g",
+    price: 125000,
+    oldPrice: null,
+    discount: false,
+    inStock: true,
+    stock: 2,
+    image: "https://images.unsplash.com/photo-1611591437281-460bfbe1220a?auto=format&fit=crop&q=80&w=800",
+    description: "A luxurious tennis bracelet featuring a continuous line of sparkling diamonds."
+  },
 
-const brands = ["KLEO", "SIRAN", "IRAM", "LUXURY"];
-const karats = ["18K", "21K", "24K", "925"];
+  // --- CARTIER Collection (Example) ---
+  {
+    id: 201,
+    name: "Love Bracelet Small Model",
+    brand: "CARTIER",
+    category: "bracelets",
+    type: "Bracelets",
+    color: "Yellow Gold",
+    carat: "18K",
+    weight: "19.5g",
+    price: 250000,
+    oldPrice: null,
+    discount: false,
+    inStock: true,
+    stock: 1,
+    image: "https://images.unsplash.com/photo-1611652022419-a9419f74343d?auto=format&fit=crop&q=80&w=800",
+    description: "The iconic LOVE bracelet, a universal symbol of love and commitment."
+  },
+  {
+    id: 202,
+    name: "Juste un Clou Ring",
+    brand: "Cartier",
+    category: "rings",
+    type: "Rings",
+    color: "Rose Gold",
+    carat: "18K",
+    weight: "7.8g",
+    price: 85000,
+    oldPrice: 90000,
+    discount: true,
+    inStock: true,
+    stock: 4,
+    image: "https://images.unsplash.com/photo-1622396090075-ab6b8396fe9b?auto=format&fit=crop&q=80&w=800",
+    description: "A bold, modern ring inspired by a simple nail."
+  },
 
-export const products = Array.from({ length: 400 }, (_, i) => ({
-  id: i + 1,
-  name: `قطعة مجوهرات رقم ${i + 1}`,
-  brand: brands[i % brands.length],
-  karat: karats[i % karats.length],
-  grams: (Math.random() * 20 + 1).toFixed(2), // وزن عشوائي بين 1 و 21 جرام
-  price: Math.floor(Math.random() * 50000 + 1000), // سعر عشوائي
-  image: `/images/product-${(i % 10) + 1}.png`, // بيفترض عندك 10 صور متكررة
-  isNew: i % 5 === 0, // علامة منتج جديد
-}));
+  // --- IRAM Collection (Example) ---
+  {
+    id: 301,
+    name: "Royal Emerald Necklace",
+    brand: "IRAM",
+    category: "necklaces",
+    type: "Necklaces",
+    color: "White Gold",
+    carat: "18K",
+    weight: "45.0g",
+    price: 850000,
+    oldPrice: null,
+    discount: false,
+    inStock: true,
+    stock: 1,
+    image: "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&q=80&w=800",
+    description: "A breathtaking statement piece featuring a large emerald centerpiece."
+  }
+];

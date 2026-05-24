@@ -12,7 +12,6 @@ const Appearance = () => {
 
   return (
     <div className="max-w-[1200px] mx-auto p-5">
-      {/* التبويبات العلوية */}
       <div className="flex gap-5 mb-8 border-b border-gray-100">
         <button 
           onClick={() => setActiveTab('banners')}
@@ -31,15 +30,12 @@ const Appearance = () => {
           <Tag size={16} /> Brands & Categories
         </button>
       </div>
-
       {activeTab === 'banners' ? <BannersManager /> : <BrandsManager />}
     </div>
   );
 };
 
-// ==========================================
-// 1. مدير البنرات (الكود الأصلي بتاعك بدون تغيير)
-// ==========================================
+// --- 1. مدير البنرات (بدون تغيير في الكود الأصلي) ---
 const BannersManager = () => {
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
@@ -102,8 +98,6 @@ const BannersManager = () => {
     setter(prev => [...prev, ...files]);
     e.target.value = null;
   };
-
-  const theme = { gold: '#D4AF37', black: '#0A0A0A', white: '#FFFFFF', red: '#FF4D4D' };
 
   if (isFetchingSliders) return (
     <div className="flex flex-col h-[60vh] items-center justify-center gap-4">
@@ -190,19 +184,17 @@ const BannersManager = () => {
   );
 };
 
-// ==========================================
-// 2. مدير البراندات والأقسام (الجديد)
-// ==========================================
+// --- 2. مدير البراندات والأقسام ---
 const BrandsManager = () => {
   const [brands, setBrands] = useState([]);
   const [newBrandName, setNewBrandName] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
-  
   const [categoryName, setCategoryName] = useState('Rings');
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [brandCategories, setBrandCategories] = useState([]);
 
+  // الأقسام المتاحة
   const categoryOptions = ['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Bangles'];
 
   const fetchBrands = async () => {

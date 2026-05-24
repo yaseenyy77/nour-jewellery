@@ -13,8 +13,8 @@ import { products } from '../../../utils/data';
 const FeaturedProducts = ({ title = "Collection", brand = "KLEO" }) => {
   const navigate = useNavigate();
   
-  // فلترة المنتجات بناءً على البراند القادم من Home.jsx
-  const filteredProducts = products.filter(p => p.brand?.toUpperCase() === brand.toUpperCase()).slice(0, 10);
+  // فلترة ذكية لا تتأثر بحالة الحروف
+  const filteredProducts = products.filter(p => p.brand?.toLowerCase() === brand.toLowerCase()).slice(0, 10);
 
   if (filteredProducts.length === 0) return null;
 

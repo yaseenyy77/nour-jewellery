@@ -18,7 +18,6 @@ const CategoriesGrid = ({ brandId, brandName }) => {
     if (brandId) fetchCategories();
   }, [brandId]);
 
-  // لو لسه مفيش صور للبراند ده، مش هنعرض القسم ده خالص
   if (categories.length === 0) return null;
 
   return (

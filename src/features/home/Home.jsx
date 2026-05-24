@@ -40,10 +40,7 @@ const Home = () => {
       {brands.length > 0 ? (
         brands.map((brand) => (
           <div key={brand.id} className="mb-20 mt-12">
-            {/* إرسال الـ ID لشبكة الأقسام لجلب الصور */}
             <CategoriesGrid brandId={brand.id} brandName={brand.name} />
-            
-            {/* إرسال اسم البراند لسلايدر المنتجات لفلترة ملف data.js */}
             <FeaturedProducts title={`${brand.name} COLLECTION`} brand={brand.name} />
           </div>
         ))
