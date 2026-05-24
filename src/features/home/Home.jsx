@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../../supabaseClient'; // تأكد من مسار السوبابيز الصحيح
+import { supabase } from '../../supabaseClient'; 
 import HeroSlider from './components/HeroSlider';
 import CategoriesGrid from './components/CategoriesGrid';
 import FeaturedProducts from './components/FeaturedProducts';
@@ -11,7 +11,6 @@ const Home = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        // جلب أسماء البراندات اللي اتضافت من الداش بورد
         const { data, error } = await supabase.from('brands').select('*').order('created_at', { ascending: true });
         if (error) throw error;
         setBrands(data || []);
@@ -26,31 +25,31 @@ const Home = () => {
   }, []);
 
   if (loading) {
-    return <div className="min-h-screen bg-white flex items-center justify-center font-bold tracking-widest text-sm">LOADING COLLECTIONS...</div>;
+    return (
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center gap-4">
+        <div className="w-8 h-8 border-2 border-black border-t-transparent rounded-full animate-spin"></div>
+        <div className="font-bold tracking-widest text-[10px] uppercase">Curating Collections...</div>
+      </div>
+    );
   }
 
   return (
     <div className="home-container bg-white min-h-screen">
-      {/* 1. السلايدر الرئيسي */}
       <HeroSlider />
       
-      {/* 2. حلقة التكرار الديناميكية لكل براند */}
       {brands.length > 0 ? (
         brands.map((brand) => (
-          <div key={brand.id} className="mb-24 mt-12">
-            {/* تمرير الـ ID لمكون الكاتيجوري عشان يجيب صوره 
-              وتمرير الاسم عشان يتعرض كعنوان
-            */}
+          <div key={brand.id} className="mb-20 mt-12">
+            {/* إرسال الـ ID لشبكة الأقسام لجلب الصور */}
             <CategoriesGrid brandId={brand.id} brandName={brand.name} />
             
-            {/* تمرير اسم البراند لسلايدر المنتجات عشان يفلتر الداتا بيز (أو ملف الداتا) ويجيب منتجاته 
-            */}
+            {/* إرسال اسم البراند لسلايدر المنتجات لفلترة ملف data.js */}
             <FeaturedProducts title={`${brand.name} COLLECTION`} brand={brand.name} />
           </div>
         ))
       ) : (
-        <div className="py-32 text-center text-gray-400 font-bold tracking-widest uppercase text-xs">
-          No brands have been added yet. Add brands from the dashboard.
+        <div className="py-40 text-center text-gray-400 font-bold tracking-widest uppercase text-xs">
+          No collections available yet. Please add brands from the dashboard.
         </div>
       )}
     </div>

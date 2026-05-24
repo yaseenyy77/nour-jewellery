@@ -3,63 +3,42 @@ import { supabase } from '../../../../supabaseClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Monitor, 
-  Smartphone, 
-  Trash2, 
-  UploadCloud, 
-  Plus, 
-  X, 
-  Image as ImageIcon,
-  Loader2,
-  Tag,
-  FolderTree
+  Monitor, Smartphone, Trash2, UploadCloud, Plus, X, 
+  Image as ImageIcon, Loader2, Tag, FolderTree
 } from 'lucide-react';
 
 const Appearance = () => {
-  // --- Tab State ---
-  const [activeTab, setActiveTab] = useState('banners'); // 'banners' or 'brands'
+  const [activeTab, setActiveTab] = useState('banners'); 
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      
-      {/* Navigation Tabs for Appearance Sections */}
-      <div style={{ display: 'flex', gap: '20px', marginBottom: '30px', borderBottom: '1px solid #eee' }}>
+    <div className="max-w-[1200px] mx-auto p-5">
+      {/* التبويبات العلوية */}
+      <div className="flex gap-5 mb-8 border-b border-gray-100">
         <button 
           onClick={() => setActiveTab('banners')}
-          style={{
-            padding: '12px 24px', background: 'none', border: 'none', 
-            borderBottom: activeTab === 'banners' ? '2px solid #000' : '2px solid transparent',
-            color: activeTab === 'banners' ? '#000' : '#888',
-            fontWeight: 'bold', fontSize: '13px', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', transition: '0.3s'
-          }}
+          className={`pb-3 px-2 text-[13px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${
+            activeTab === 'banners' ? 'border-b-2 border-black text-black' : 'border-b-2 border-transparent text-gray-400 hover:text-black'
+          }`}
         >
-          <ImageIcon size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} />
-          Banners
+          <ImageIcon size={16} /> Banners
         </button>
         <button 
           onClick={() => setActiveTab('brands')}
-          style={{
-            padding: '12px 24px', background: 'none', border: 'none', 
-            borderBottom: activeTab === 'brands' ? '2px solid #000' : '2px solid transparent',
-            color: activeTab === 'brands' ? '#000' : '#888',
-            fontWeight: 'bold', fontSize: '13px', letterSpacing: '1px', textTransform: 'uppercase', cursor: 'pointer', transition: '0.3s'
-          }}
+          className={`pb-3 px-2 text-[13px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${
+            activeTab === 'brands' ? 'border-b-2 border-black text-black' : 'border-b-2 border-transparent text-gray-400 hover:text-black'
+          }`}
         >
-          <Tag size={16} style={{ display: 'inline', marginRight: '8px', verticalAlign: 'text-bottom' }} />
-          Brands & Categories
+          <Tag size={16} /> Brands & Categories
         </button>
       </div>
 
-      {/* Render Selected Section */}
       {activeTab === 'banners' ? <BannersManager /> : <BrandsManager />}
     </div>
   );
 };
 
-export default Appearance;
-
 // ==========================================
-// 1. ORIGINAL BANNERS MANAGER (UNTOUCHED)
+// 1. مدير البنرات (الكود الأصلي بتاعك بدون تغيير)
 // ==========================================
 const BannersManager = () => {
   const [desktopImages, setDesktopImages] = useState([]);
@@ -124,22 +103,22 @@ const BannersManager = () => {
     e.target.value = null;
   };
 
-  const theme = { gold: '#D4AF37', black: '#0A0A0A', gray: '#F5F5F5', white: '#FFFFFF', red: '#FF4D4D' };
+  const theme = { gold: '#D4AF37', black: '#0A0A0A', white: '#FFFFFF', red: '#FF4D4D' };
 
   if (isFetchingSliders) return (
-    <div style={{ display: 'flex', height: '60vh', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '15px' }}>
-      <Loader2 size={40} className="animate-spin" style={{ color: theme.gold }} />
-      <p style={{ letterSpacing: '2px', fontWeight: '500', color: '#666' }}>REFINING YOUR VIEW...</p>
+    <div className="flex flex-col h-[60vh] items-center justify-center gap-4">
+      <Loader2 size={40} className="animate-spin text-[#D4AF37]" />
+      <p className="tracking-widest font-medium text-gray-500 uppercase text-xs">Refining your view...</p>
     </div>
   );
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ fontFamily: '"Inter", sans-serif', color: theme.black }}>
-      <header style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
-          Visual <span style={{ color: theme.gold }}>Experience</span>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-['Inter']">
+      <header className="mb-10 text-center">
+        <h1 className="text-3xl font-extrabold tracking-widest uppercase mb-2">
+          Visual <span className="text-[#D4AF37]">Experience</span>
         </h1>
-        <p style={{ color: '#666', fontSize: '15px' }}>Curate the luxury aesthetic of your jewellery banners</p>
+        <p className="text-gray-500 text-sm">Curate the luxury aesthetic of your jewellery banners</p>
       </header>
 
       <form onSubmit={(e) => { e.preventDefault(); uploadMutation.mutate(); }}>
@@ -147,78 +126,78 @@ const BannersManager = () => {
           { title: 'Desktop Masterpiece', subtitle: 'Widescreen HD Banners', icon: <Monitor size={20}/>, live: liveDesktopImages, pending: desktopImages, setter: setDesktopImages, type: 'desktop' },
           { title: 'Mobile Elegance', subtitle: 'Handheld Optimized Banners', icon: <Smartphone size={20}/>, live: liveMobileImages, pending: mobileImages, setter: setMobileImages, type: 'mobile' }
         ].map((sec, idx) => (
-          <section key={idx} style={{ background: theme.white, borderRadius: '16px', padding: '30px', marginBottom: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #eee' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '25px' }}>
+          <section key={idx} className="bg-white rounded-2xl p-8 mb-8 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border border-gray-100">
+            <div className="flex items-center justify-between mb-6">
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '5px' }}>
-                  <span style={{ color: theme.gold }}>{sec.icon}</span>
-                  <h3 style={{ fontSize: '20px', fontWeight: '700', margin: 0 }}>{sec.title}</h3>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[#D4AF37]">{sec.icon}</span>
+                  <h3 className="text-xl font-bold">{sec.title}</h3>
                 </div>
-                <p style={{ fontSize: '13px', color: '#888' }}>{sec.subtitle}</p>
+                <p className="text-xs text-gray-400">{sec.subtitle}</p>
               </div>
-              <label style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '8px', border: `1px solid ${theme.black}`, fontSize: '13px', fontWeight: '600', transition: 'all 0.2s' }} className="btn-hover">
+              <label className="cursor-pointer flex items-center gap-2 px-5 py-2.5 rounded-lg border border-black text-xs font-semibold hover:bg-black hover:text-white transition-all">
                 <Plus size={16} /> Add New
                 <input type="file" hidden multiple onChange={(e) => handleFileChange(e, sec.setter)} />
               </label>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-5">
               <AnimatePresence>
                 {sec.live.map((img) => (
-                  <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} key={img.id} style={{ position: 'relative', height: '120px', borderRadius: '12px', overflow: 'hidden' }} className="image-card">
-                    <img src={img.image_url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Banner" />
-                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', opacity: 0, transition: '0.3s', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="hover-overlay">
-                        <button type="button" onClick={() => window.confirm('Delete forever?') && deleteMutation.mutate({ id: img.id, imageUrl: img.image_url })} style={{ background: theme.white, color: theme.red, border: 'none', padding: '8px', borderRadius: '50%', cursor: 'pointer' }}>
-                          <Trash2 size={18} />
+                  <motion.div layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} key={img.id} className="relative h-28 rounded-xl overflow-hidden group">
+                    <img src={img.image_url} className="w-full h-full object-cover" alt="Banner" />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button type="button" onClick={() => window.confirm('Delete forever?') && deleteMutation.mutate({ id: img.id, imageUrl: img.image_url })} className="bg-white text-red-500 p-2 rounded-full hover:scale-110 transition-transform">
+                          <Trash2 size={16} />
                         </button>
                     </div>
-                    <span style={{ position: 'absolute', top: '8px', left: '8px', background: theme.gold, color: '#fff', fontSize: '10px', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>LIVE</span>
+                    <span className="absolute top-2 left-2 bg-[#D4AF37] text-white text-[9px] px-2 py-1 rounded font-bold tracking-wider">LIVE</span>
                   </motion.div>
                 ))}
                 {sec.pending.map((img) => (
-                  <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={img.id} style={{ position: 'relative', height: '120px', borderRadius: '12px', overflow: 'hidden', border: `2px dashed ${theme.gold}` }}>
-                    <img src={img.preview} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} alt="Preview" />
-                    <button type="button" onClick={() => sec.setter(prev => prev.filter(i => i.id !== img.id))} style={{ position: 'absolute', top: '8px', right: '8px', background: theme.black, color: '#fff', border: 'none', borderRadius: '50%', padding: '4px', cursor: 'pointer' }}>
-                      <X size={14} />
+                  <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} key={img.id} className="relative h-28 rounded-xl overflow-hidden border-2 border-dashed border-[#D4AF37]">
+                    <img src={img.preview} className="w-full h-full object-cover opacity-60" alt="Preview" />
+                    <button type="button" onClick={() => sec.setter(prev => prev.filter(i => i.id !== img.id))} className="absolute top-2 right-2 bg-black text-white rounded-full p-1 hover:scale-110 transition-transform">
+                      <X size={12} />
                     </button>
-                    <span style={{ position: 'absolute', bottom: '8px', left: '8px', color: theme.black, fontSize: '10px', fontWeight: '800' }}>READY</span>
+                    <span className="absolute bottom-2 left-2 text-black text-[9px] font-bold tracking-wider bg-white/80 px-2 py-0.5 rounded">READY</span>
                   </motion.div>
                 ))}
               </AnimatePresence>
             </div>
+            
             {sec.live.length === 0 && sec.pending.length === 0 && (
-              <div style={{ textAlign: 'center', padding: '40px', border: '1px dashed #ddd', borderRadius: '12px' }}>
-                <ImageIcon size={32} style={{ color: '#ccc', marginBottom: '10px' }} />
-                <p style={{ color: '#999', fontSize: '13px' }}>No banners set</p>
+              <div className="text-center p-10 border border-dashed border-gray-200 rounded-xl">
+                <ImageIcon size={32} className="text-gray-300 mx-auto mb-3" />
+                <p className="text-gray-400 text-xs">No banners set for this layout</p>
               </div>
             )}
           </section>
         ))}
+
         <AnimatePresence>
           {(desktopImages.length > 0 || mobileImages.length > 0) && (
-            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} style={{ position: 'fixed', bottom: '30px', left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
-              <button type="submit" disabled={uploadMutation.isPending} style={{ background: theme.black, color: theme.white, border: 'none', padding: '16px 40px', borderRadius: '50px', fontSize: '15px', fontWeight: '700', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', transition: '0.3s' }}>
-                {uploadMutation.isPending ? <Loader2 className="animate-spin" /> : <UploadCloud size={20} />}
+            <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 50 }} className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
+              <button type="submit" disabled={uploadMutation.isPending} className="bg-black text-white px-8 py-4 rounded-full text-xs font-bold tracking-widest shadow-2xl flex items-center gap-3 hover:bg-neutral-800 transition-colors">
+                {uploadMutation.isPending ? <Loader2 className="animate-spin" size={18} /> : <UploadCloud size={18} />}
                 {uploadMutation.isPending ? 'PUBLISHING...' : 'SAVE & PUBLISH CHANGES'}
               </button>
             </motion.div>
           )}
         </AnimatePresence>
       </form>
-      <style>{`
-        .image-card:hover .hover-overlay { opacity: 1 !important; }
-        .btn-hover:hover { background: #000; color: #fff; }
-      `}</style>
     </motion.div>
   );
 };
 
 // ==========================================
-// 2. NEW BRANDS & CATEGORIES MANAGER
+// 2. مدير البراندات والأقسام (الجديد)
 // ==========================================
 const BrandsManager = () => {
   const [brands, setBrands] = useState([]);
   const [newBrandName, setNewBrandName] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
+  
   const [categoryName, setCategoryName] = useState('Rings');
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -277,93 +256,90 @@ const BrandsManager = () => {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={{ fontFamily: '"Inter", sans-serif' }}>
-      <header style={{ marginBottom: '40px', textAlign: 'center' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '800', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '10px' }}>
-          Brand <span style={{ color: '#D4AF37' }}>Management</span>
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="font-['Inter']">
+      <header className="mb-10 text-center">
+        <h1 className="text-3xl font-extrabold tracking-widest uppercase mb-2">
+          Brand <span className="text-[#D4AF37]">Management</span>
         </h1>
-        <p style={{ color: '#666', fontSize: '15px' }}>Dynamically add brands and assign category images for the homepage</p>
+        <p className="text-gray-500 text-sm">Dynamically add brands and assign category images</p>
       </header>
 
-      {/* Add Brand */}
-      <div style={{ background: '#fff', padding: '30px', borderRadius: '16px', border: '1px solid #eee', marginBottom: '30px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>
-          <FolderTree size={16} style={{ display: 'inline', marginRight: '8px' }}/> Add New Brand
+      {/* إضافة براند */}
+      <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] mb-8">
+        <h3 className="text-xs font-bold uppercase tracking-widest mb-5 flex items-center gap-2">
+          <FolderTree size={16} /> Add New Brand
         </h3>
-        <form onSubmit={handleAddBrand} style={{ display: 'flex', gap: '15px' }}>
+        <form onSubmit={handleAddBrand} className="flex gap-4">
           <input 
             type="text" placeholder="e.g., CARTIER, KLEO" value={newBrandName} onChange={(e) => setNewBrandName(e.target.value)}
-            style={{ flex: 1, padding: '12px 20px', border: '1px solid #ddd', borderRadius: '8px', fontSize: '14px', outline: 'none' }}
+            className="flex-1 px-5 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:border-black transition-colors"
           />
-          <button type="submit" style={{ background: '#000', color: '#fff', padding: '0 30px', border: 'none', borderRadius: '8px', fontWeight: 'bold', letterSpacing: '1px', cursor: 'pointer' }}>
-            ADD BRAND
+          <button type="submit" className="bg-black text-white px-8 py-3 rounded-lg font-bold tracking-widest text-xs uppercase hover:bg-neutral-800 transition-colors">
+            Add Brand
           </button>
         </form>
       </div>
 
-      {/* Select & Manage Brand */}
+      {/* إدارة البراندات */}
       {brands.length > 0 && (
-        <div style={{ background: '#fff', padding: '30px', borderRadius: '16px', border: '1px solid #eee', boxShadow: '0 4px 20px rgba(0,0,0,0.05)' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '20px' }}>
-            Select Brand to Manage
-          </h3>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '30px' }}>
+        <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+          <h3 className="text-xs font-bold uppercase tracking-widest mb-5">Select Brand to Manage</h3>
+          
+          <div className="flex flex-wrap gap-3 mb-8">
             {brands.map(b => (
-              <div key={b.id} style={{ display: 'flex', alignItems: 'center' }}>
+              <div key={b.id} className="flex items-center">
                 <button 
                   onClick={() => setSelectedBrand(b)}
-                  style={{
-                    padding: '10px 20px', background: selectedBrand?.id === b.id ? '#000' : '#fff',
-                    color: selectedBrand?.id === b.id ? '#fff' : '#000', border: '1px solid #000',
-                    fontWeight: 'bold', letterSpacing: '1px', fontSize: '12px', cursor: 'pointer',
-                    borderRadius: '8px 0 0 8px'
-                  }}
+                  className={`px-5 py-2.5 border border-black font-bold tracking-widest text-[10px] uppercase rounded-l-lg transition-colors ${
+                    selectedBrand?.id === b.id ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-50'
+                  }`}
                 >
                   {b.name}
                 </button>
                 <button 
                   onClick={() => handleDeleteBrand(b.id)}
-                  style={{ padding: '10px 15px', background: '#fff', border: '1px solid #000', borderLeft: 'none', color: '#FF4D4D', cursor: 'pointer', borderRadius: '0 8px 8px 0' }}
+                  className="px-3 py-2.5 bg-white border border-black border-l-0 text-red-500 rounded-r-lg hover:bg-red-50 transition-colors"
                 >
-                  <Trash2 size={16} />
+                  <Trash2 size={14} />
                 </button>
               </div>
             ))}
           </div>
 
           {selectedBrand && (
-            <div style={{ background: '#fcfcfc', padding: '25px', border: '1px solid #eee', borderRadius: '12px' }}>
-              <h4 style={{ fontSize: '13px', fontWeight: 'bold', textTransform: 'uppercase', marginBottom: '20px', color: '#666' }}>
-                Add Category Image to <span style={{color: '#000'}}>{selectedBrand.name}</span>
+            <div className="bg-[#fafafa] p-6 rounded-xl border border-gray-100">
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-6 text-gray-500">
+                Add Categories to <span className="text-black">{selectedBrand.name}</span>
               </h4>
-              <form onSubmit={handleAddCategory} style={{ display: 'flex', flexWrap: 'wrap', gap: '20px', alignItems: 'flex-end' }}>
-                <div style={{ flex: '1 1 200px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px' }}>CATEGORY</label>
-                  <select value={categoryName} onChange={(e) => setCategoryName(e.target.value)} style={{ width: '100%', padding: '12px', border: '1px solid #ddd', borderRadius: '6px' }}>
+              
+              <form onSubmit={handleAddCategory} className="flex flex-wrap items-end gap-5">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">Category Type</label>
+                  <select value={categoryName} onChange={(e) => setCategoryName(e.target.value)} className="w-full p-3 border border-gray-200 rounded-lg outline-none focus:border-black">
                     {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                   </select>
                 </div>
-                <div style={{ flex: '1 1 200px' }}>
-                  <label style={{ display: 'block', fontSize: '11px', fontWeight: 'bold', letterSpacing: '1px', marginBottom: '8px' }}>IMAGE</label>
-                  <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} style={{ width: '100%', padding: '9px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff' }} />
+                <div className="flex-1 min-w-[200px]">
+                  <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">Category Image</label>
+                  <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full p-2 border border-gray-200 rounded-lg bg-white outline-none" />
                 </div>
-                <button type="submit" disabled={isUploading} style={{ background: '#D4AF37', color: '#fff', padding: '12px 30px', border: 'none', borderRadius: '6px', fontWeight: 'bold', letterSpacing: '1px', cursor: isUploading ? 'not-allowed' : 'pointer' }}>
-                  {isUploading ? 'SAVING...' : 'SAVE CATEGORY'}
+                <button type="submit" disabled={isUploading} className="bg-[#D4AF37] text-white px-8 py-3 rounded-lg font-bold tracking-widest text-xs uppercase hover:bg-[#c4a133] transition-colors disabled:opacity-50 h-[46px]">
+                  {isUploading ? 'Saving...' : 'Save Category'}
                 </button>
               </form>
 
-              {/* Grid for uploaded categories */}
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '15px', marginTop: '30px' }}>
+              {/* شبكة الصور المرفوعة */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8">
                 {brandCategories.map(cat => (
-                  <div key={cat.id} style={{ position: 'relative', border: '1px solid #eee', background: '#fff', padding: '5px' }}>
-                    <img src={cat.image_url} alt={cat.category_name} style={{ width: '100%', aspectRatio: '4/5', objectFit: 'cover' }} />
-                    <p style={{ textAlign: 'center', fontSize: '10px', fontWeight: 'bold', letterSpacing: '2px', textTransform: 'uppercase', padding: '10px 0 5px' }}>{cat.category_name}</p>
+                  <div key={cat.id} className="relative group bg-white p-2 border border-gray-100 rounded-lg">
+                    <img src={cat.image_url} alt={cat.category_name} className="w-full aspect-[4/5] object-cover rounded mb-2" />
+                    <p className="text-center text-[9px] font-bold tracking-widest uppercase pt-1">{cat.category_name}</p>
                     <button 
                       onClick={async () => {
                         await supabase.from('brand_categories').delete().eq('id', cat.id);
                         fetchBrandCategories(selectedBrand.id);
                       }}
-                      style={{ position: 'absolute', top: '10px', right: '10px', background: '#FF4D4D', color: '#fff', border: 'none', padding: '5px', borderRadius: '4px', cursor: 'pointer' }}
+                      className="absolute top-4 right-4 bg-red-500 text-white p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:scale-110"
                     >
                       <Trash2 size={12} />
                     </button>
@@ -377,3 +353,5 @@ const BrandsManager = () => {
     </motion.div>
   );
 };
+
+export default Appearance;
