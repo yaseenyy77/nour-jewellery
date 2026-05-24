@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../supabaseClient'; 
+import { supabase } from '../../../../supabaseClient'; 
 
 const CategoriesGrid = ({ brandId, brandName }) => {
   const [categories, setCategories] = useState([]);
