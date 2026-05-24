@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../supabaseClient'; 
+import { supabase } from '../../../supabaseClient'; 
 import HeroSlider from './components/HeroSlider';
 import CategoriesGrid from './components/CategoriesGrid';
 import FeaturedProducts from './components/FeaturedProducts';
