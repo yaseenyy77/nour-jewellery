@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../supabaseClient'; // تأكد من مسار السوبابيز الصحيح
+import { supabase } from '../../../supabaseClient'; // تأكد من مسار السوبابيز الصحيح
 import HeroSlider from './components/HeroSlider';
 import CategoriesGrid from './components/CategoriesGrid';
 import FeaturedProducts from './components/FeaturedProducts';
