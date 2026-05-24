@@ -1,71 +1,68 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // 1️⃣ استيراد أداة التنقل
+import React, { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase'; // تأكد من مسار السوبابيز عندك
+import { ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-const categories = [
-  { id: 'necklaces', name: 'Necklaces', image: '/images/cat-necklaces.png' },
-  { id: 'rings', name: 'Rings', image: '/images/cat-rings.png' },
-  { id: 'bracelets', name: 'Bracelets', image: '/images/cat-bracelets.png' },
-  { id: 'earrings', name: 'Earrings', image: '/images/cat-earrings.png' },
-];
+const CategoriesGrid = ({ brandId, brandName }) => {
+  const [categories, setCategories] = useState([]);
+  const navigate = useNavigate();
 
-const CategoriesGrid = ({ brand = "KLEO" }) => {
-  const navigate = useNavigate(); // 2️⃣ تفعيل هوك التنقل داخل المكون
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('brand_categories')
+        .select('*')
+        .eq('brand_id', brandId);
+      
+      if (data) setCategories(data);
+    };
+    if (brandId) fetchCategories();
+  }, [brandId]);
+
+  // لو البراند لسه متضافلوش صور، مش هنعرض الجريد عشان ميبوظش الشكل
+  if (categories.length === 0) return null;
 
   return (
-    <section className="w-full py-8 md:py-12 px-4 max-w-[1200px] mx-auto bg-white">
-      
-      {/* الهيدر: تحسين المسافات للموبايل */}
-      <div className="flex justify-between items-center mb-6 md:mb-10 border-b border-gray-100 pb-4 md:pb-6">
-        {/* تم تحويل الرابط لزرار تنقل ذكي لصفحة الشوب العامة */}
-        <button 
-          onClick={() => navigate('/shop')} 
-          className="group flex items-center gap-1.5 md:gap-2 text-[8px] md:text-[9px] font-bold tracking-[0.15em] md:tracking-[0.2em] uppercase text-gray-400 hover:text-black transition-all duration-500 bg-transparent border-none cursor-pointer"
-        >
-          <span className="text-sm md:text-base group-hover:-translate-x-1 transition-transform">&larr;</span>
-          SHOP ALL
-        </button>
-
-        <div className="flex items-center gap-3 md:gap-4">
-          <h2 className="text-lg md:text-3xl font-black tracking-[0.15em] md:tracking-[0.25em] uppercase text-black">
-            {brand}
+    <div className="max-w-[1400px] mx-auto px-4 py-16 md:py-24">
+      <div className="flex items-end justify-between mb-10">
+        <div>
+          <h2 className="text-2xl md:text-3xl font-black uppercase tracking-widest text-black">
+            {brandName} CATEGORIES
           </h2>
-          <div className="hidden sm:block h-[1px] bg-black w-10 md:w-16"></div>
+          <p className="text-gray-400 text-xs tracking-widest uppercase mt-2">Discover The Collections</p>
         </div>
+        <button 
+          onClick={() => navigate(`/shop/${brandName}`)}
+          className="hidden md:flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] hover:text-gray-500 transition-colors"
+        >
+          View All <ArrowRight size={14} />
+        </button>
       </div>
 
-      {/* الشبكة الاستجابية */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-        {categories.map((cat) => (
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+        {categories.map((cat, idx) => (
           <div 
             key={cat.id} 
-            className="group cursor-pointer flex flex-col"
-            onClick={() => navigate(`/shop/${brand}/${cat.id}`)} // 3️⃣ السحر كله هنا: لما تدوس هينقلك للشوب متفلتر بالبراند والقسم ده بالظبط!
+            onClick={() => navigate(`/shop/${brandName}/${cat.category_name.toLowerCase()}`)}
+            className="group cursor-pointer relative overflow-hidden bg-[#fafafa]"
           >
-            <div className="relative aspect-square overflow-hidden bg-[#f9f9f9] mb-2 md:mb-3">
+            <div className="relative w-full aspect-[4/5] overflow-hidden">
               <img 
-                src={cat.image} 
-                alt={cat.name} 
-                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 grayscale hover:grayscale-0"
+                src={cat.image_url} 
+                alt={cat.category_name} 
+                className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-110"
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-500" />
             </div>
-            
-            <div className="flex items-center justify-between px-0.5">
-              <span className="text-base md:text-lg font-light text-gray-300 group-hover:text-black transition-colors">
-                &#43;
-              </span>
-              
-              <h3 className="text-black text-[8px] md:text-[10px] font-bold tracking-[0.15em] md:tracking-[0.25em] uppercase transition-all">
-                {cat.name}
+            <div className="absolute bottom-6 left-0 right-0 text-center z-10">
+              <h3 className="text-white text-xs md:text-sm font-bold uppercase tracking-[0.25em] drop-shadow-md">
+                {cat.category_name}
               </h3>
             </div>
-            
-            {/* خط التأثير السفلي - يعمل بشكل أنعم على الموبايل */}
-            <div className="mt-1.5 h-[1px] w-0 group-hover:w-full bg-black transition-all duration-700 mx-auto"></div>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 };
 
