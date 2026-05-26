@@ -8,18 +8,24 @@ const CategoriesGrid = ({ brandId, brandName }) => {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      if (!brandId) return; // حماية إضافية
-      
-      const { data, error } = await supabase
-        .from('brand_categories')
-        .select('*')
-        .eq('brand_id', brandId);
-      
-      if (!error && data) setCategories(data);
+      if (!brandId) return;
+      try {
+        const { data, error } = await supabase
+          .from('brand_categories')
+          .select('*')
+          .eq('brand_id', brandId);
+        
+        if (!error && data) {
+          setCategories(data);
+        }
+      } catch (err) {
+        console.error("Error fetching grid categories:", err);
+      }
     };
     fetchCategories();
   }, [brandId]);
 
+  // إذا لم يرفع الأدمن صور أقسام لهذا البراند بعد، لن يعرض شبكة فارغة ولن ينهار الموقع
   if (categories.length === 0) return null;
 
   return (
@@ -35,7 +41,7 @@ const CategoriesGrid = ({ brandId, brandName }) => {
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
         {categories.map((cat) => {
-          // السحر هنا: حماية ضد اختلاف أسماء الأعمدة في قاعدة البيانات (سواء كان اسمه category_name أو name)
+          // حماية قصوى: يدعم التسمية category_name أو name تلقائياً دون كراش
           const safeCategoryName = cat.category_name || cat.name || 'general';
 
           return (

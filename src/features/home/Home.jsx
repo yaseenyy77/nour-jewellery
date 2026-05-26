@@ -11,11 +11,15 @@ const Home = () => {
   useEffect(() => {
     const fetchBrands = async () => {
       try {
-        const { data, error } = await supabase.from('brands').select('*').order('created_at', { ascending: true });
+        const { data, error } = await supabase
+          .from('brands')
+          .select('*')
+          .order('created_at', { ascending: true });
+          
         if (error) throw error;
         setBrands(data || []);
       } catch (err) {
-        console.error("Error fetching brands:", err);
+        console.error("Error fetching brands in Home:", err);
       } finally {
         setLoading(false);
       }
@@ -35,18 +39,23 @@ const Home = () => {
 
   return (
     <div className="home-container bg-white min-h-screen">
+      {/* سلايدر البنرات العلوي */}
       <HeroSlider />
       
+      {/* عرض شبكة الأقسام والمنتجات لكل براند ديناميكياً */}
       {brands.length > 0 ? (
         brands.map((brand) => (
           <div key={brand.id} className="mb-20 mt-12">
+            {/* إرسال الـ ID والاسم لشبكة الأقسام */}
             <CategoriesGrid brandId={brand.id} brandName={brand.name} />
+            
+            {/* إرسال الاسم لسلايدر المنتجات */}
             <FeaturedProducts title={`${brand.name} COLLECTION`} brand={brand.name} />
           </div>
         ))
       ) : (
-        <div className="py-40 text-center text-gray-400 font-bold tracking-widest uppercase text-xs">
-          No collections available yet. Please add brands from the dashboard.
+        <div className="text-center py-20 text-gray-400 font-medium text-xs tracking-widest uppercase">
+          No collections available yet. Please add brands from the Dashboard.
         </div>
       )}
     </div>

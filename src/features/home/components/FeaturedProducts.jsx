@@ -13,16 +13,15 @@ import { products } from '../../../utils/data';
 const FeaturedProducts = ({ title = "Collection", brand = "" }) => {
   const navigate = useNavigate();
   
-  // حماية ضد أن يكون البراند غير معرف
   const safeBrand = brand || '';
   
+  // فلترة ذكية لربط المنتجات المحلية باسم البراند الجديد المضاف
   const filteredProducts = products.filter(p => 
     p.brand?.toUpperCase() === safeBrand.toUpperCase()
   ).slice(0, 10);
 
   if (filteredProducts.length === 0) return null;
 
-  // إزالة المسافات من اسم البراند لضمان عمل أزرار السلايدر بشكل صحيح
   const sliderClass = safeBrand.replace(/\s+/g, '');
 
   return (
@@ -48,7 +47,6 @@ const FeaturedProducts = ({ title = "Collection", brand = "" }) => {
           breakpoints={{
             640: { slidesPerView: 2, spaceBetween: 20 },
             768: { slidesPerView: 3, spaceBetween: 20 },
-            1024: { slidesPerView: 4, spaceBetween: 25 },
           }}
         >
           {filteredProducts.map((product) => (
