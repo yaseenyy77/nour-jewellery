@@ -45,12 +45,12 @@ const CategoriesGrid = ({ brandId, brandName }) => {
             className="group cursor-pointer flex flex-col"
             onClick={() => navigate(`/shop/${brandName}/${cat.category_name.toLowerCase()}`)} 
           >
-            {/* مربع الصورة والـ Grayscale والـ Scale الإنسيابي */}
+            {/* مربع الصورة - تم إزالة الـ Grayscale وباقي الكود كما هو */}
             <div className="relative aspect-square overflow-hidden bg-[#f9f9f9] mb-2 md:mb-3">
               <img 
                 src={cat.image_url} 
                 alt={cat.category_name} 
-                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110 grayscale hover:grayscale-0"
+                className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors duration-500"></div>
             </div>
