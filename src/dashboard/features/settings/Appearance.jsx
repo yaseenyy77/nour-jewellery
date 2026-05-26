@@ -12,6 +12,7 @@ const Appearance = () => {
 
   return (
     <div className="max-w-[1200px] mx-auto p-5">
+      {/* التبويبات العلوية */}
       <div className="flex gap-5 mb-8 border-b border-gray-100">
         <button 
           onClick={() => setActiveTab('banners')}
@@ -30,13 +31,17 @@ const Appearance = () => {
           <Tag size={16} /> Brands & Categories
         </button>
       </div>
+
       {activeTab === 'banners' ? <BannersManager /> : <BrandsManager />}
     </div>
   );
 };
 
-// --- 1. مدير البنرات (بدون تغيير في الكود الأصلي) ---
+// ==========================================
+// 1. مدير البنرات (الكود الأصلي بدون تغيير)
+// ==========================================
 const BannersManager = () => {
+  // ... (محتوى BannersManager لم يتغير)
   const [desktopImages, setDesktopImages] = useState([]);
   const [mobileImages, setMobileImages] = useState([]);
   const queryClient = useQueryClient();
@@ -98,6 +103,8 @@ const BannersManager = () => {
     setter(prev => [...prev, ...files]);
     e.target.value = null;
   };
+
+  const theme = { gold: '#D4AF37', black: '#0A0A0A', white: '#FFFFFF', red: '#FF4D4D' };
 
   if (isFetchingSliders) return (
     <div className="flex flex-col h-[60vh] items-center justify-center gap-4">
@@ -184,63 +191,122 @@ const BannersManager = () => {
   );
 };
 
-// --- 2. مدير البراندات والأقسام ---
+// ==========================================
+// 2. مدير البراندات والأقسام 
+// ==========================================
 const BrandsManager = () => {
   const [brands, setBrands] = useState([]);
   const [newBrandName, setNewBrandName] = useState('');
   const [selectedBrand, setSelectedBrand] = useState(null);
+  
   const [categoryName, setCategoryName] = useState('Rings');
   const [imageFile, setImageFile] = useState(null);
   const [isUploading, setIsUploading] = useState(false);
   const [brandCategories, setBrandCategories] = useState([]);
 
-  // الأقسام المتاحة
   const categoryOptions = ['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Bangles'];
 
+  // استخدام useCallback مفيد هنا إذا كنت تمرر هذه الدوال، لكن للتبسيط يمكن إبقاؤها هكذا
   const fetchBrands = async () => {
-    const { data } = await supabase.from('brands').select('*').order('created_at', { ascending: false });
-    if (data) setBrands(data);
+    try {
+      const { data, error } = await supabase.from('brands').select('*').order('created_at', { ascending: false });
+      if (error) {
+         console.error('Error fetching brands:', error);
+      } else {
+         setBrands(data || []);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching brands:', err);
+    }
   };
 
   const fetchBrandCategories = async (brandId) => {
-    const { data } = await supabase.from('brand_categories').select('*').eq('brand_id', brandId);
-    if (data) setBrandCategories(data);
+    try {
+       const { data, error } = await supabase.from('brand_categories').select('*').eq('brand_id', brandId);
+       if (error) {
+          console.error('Error fetching brand categories:', error);
+       } else {
+          setBrandCategories(data || []);
+       }
+    } catch (err) {
+       console.error('Unexpected error fetching categories:', err);
+    }
   };
 
-  useEffect(() => { fetchBrands(); }, []);
-  useEffect(() => { if (selectedBrand) fetchBrandCategories(selectedBrand.id); }, [selectedBrand]);
+  useEffect(() => {
+    fetchBrands();
+  }, []);
+
+  useEffect(() => {
+    if (selectedBrand) {
+      fetchBrandCategories(selectedBrand.id);
+    }
+  }, [selectedBrand]);
 
   const handleAddBrand = async (e) => {
     e.preventDefault();
     if (!newBrandName) return;
-    await supabase.from('brands').insert([{ name: newBrandName }]);
-    setNewBrandName('');
-    fetchBrands();
+
+    try {
+       const { error } = await supabase.from('brands').insert([{ name: newBrandName }]);
+       if (error) {
+          console.error('Error adding brand:', error);
+          alert('Failed to add brand. Please check the console.');
+       } else {
+          setNewBrandName('');
+          await fetchBrands(); // جلب البراندات مرة أخرى لتحديث الواجهة فوراً
+       }
+    } catch (err) {
+       console.error('Unexpected error adding brand:', err);
+    }
   };
 
   const handleDeleteBrand = async (brandId) => {
     if(!window.confirm('Delete brand and all its categories?')) return;
-    await supabase.from('brands').delete().eq('id', brandId);
-    if(selectedBrand?.id === brandId) setSelectedBrand(null);
-    fetchBrands();
+    
+    try {
+       const { error } = await supabase.from('brands').delete().eq('id', brandId);
+       if (error) {
+           console.error('Error deleting brand:', error);
+       } else {
+           if(selectedBrand?.id === brandId) setSelectedBrand(null);
+           await fetchBrands(); // تحديث القائمة فوراً
+       }
+    } catch (err) {
+       console.error('Unexpected error deleting brand:', err);
+    }
   };
 
   const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!selectedBrand || !imageFile) return alert("Please select an image!");
+    
     setIsUploading(true);
     try {
       const fileExt = imageFile.name.split('.').pop();
       const fileName = `${selectedBrand.name}-${categoryName}-${Math.random()}.${fileExt}`;
+      
       const { error: uploadError } = await supabase.storage.from('brand_category_images').upload(fileName, imageFile);
       if (uploadError) throw uploadError;
       
       const { data: { publicUrl } } = supabase.storage.from('brand_category_images').getPublicUrl(fileName);
-      await supabase.from('brand_categories').insert([{ brand_id: selectedBrand.id, category_name: categoryName, image_url: publicUrl }]);
       
-      setImageFile(null);
-      fetchBrandCategories(selectedBrand.id);
+      const { error: insertError } = await supabase.from('brand_categories').insert([{ 
+         brand_id: selectedBrand.id, 
+         category_name: categoryName, 
+         image_url: publicUrl 
+      }]);
+
+      if (insertError) throw insertError;
+      
+      setImageFile(null); // إعادة تعيين الملف المُختار
+      // أعد تعيين حقل إدخال الملف
+      const fileInput = document.getElementById('category-image-upload');
+      if(fileInput) fileInput.value = '';
+
+      await fetchBrandCategories(selectedBrand.id); // تحديث الصور المعروضة للبراند المختار فوراً
     } catch (error) {
+      console.error('Error uploading/adding category:', error);
       alert("Error: " + error.message);
     } finally {
       setIsUploading(false);
@@ -313,7 +379,7 @@ const BrandsManager = () => {
                 </div>
                 <div className="flex-1 min-w-[200px]">
                   <label className="block text-[10px] font-bold tracking-widest uppercase mb-2">Category Image</label>
-                  <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full p-2 border border-gray-200 rounded-lg bg-white outline-none" />
+                  <input id="category-image-upload" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full p-2 border border-gray-200 rounded-lg bg-white outline-none" />
                 </div>
                 <button type="submit" disabled={isUploading} className="bg-[#D4AF37] text-white px-8 py-3 rounded-lg font-bold tracking-widest text-xs uppercase hover:bg-[#c4a133] transition-colors disabled:opacity-50 h-[46px]">
                   {isUploading ? 'Saving...' : 'Save Category'}
@@ -328,8 +394,14 @@ const BrandsManager = () => {
                     <p className="text-center text-[9px] font-bold tracking-widest uppercase pt-1">{cat.category_name}</p>
                     <button 
                       onClick={async () => {
-                        await supabase.from('brand_categories').delete().eq('id', cat.id);
-                        fetchBrandCategories(selectedBrand.id);
+                        if(window.confirm('Delete this category image?')) {
+                            const { error } = await supabase.from('brand_categories').delete().eq('id', cat.id);
+                            if(error) {
+                                console.error('Error deleting category:', error);
+                            } else {
+                                await fetchBrandCategories(selectedBrand.id);
+                            }
+                        }
                       }}
                       className="absolute top-4 right-4 bg-red-500 text-white p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-lg hover:scale-110"
                     >
