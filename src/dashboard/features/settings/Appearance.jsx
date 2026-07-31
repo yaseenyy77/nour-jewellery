@@ -1,281 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../../../../supabaseClient';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Monitor, Smartphone, Trash2, UploadCloud, Plus, X, 
-  Image as ImageIcon, Loader2, Tag, FolderTree
+  Image as ImageIcon, Loader2
 } from 'lucide-react';
 
-const theme = { gold: '#D4AF37', black: '#0A0A0A', white: '#FFFFFF', red: '#FF4D4D' };
-
 const Appearance = () => {
-  const [activeTab, setActiveTab] = useState('brands'); // جعلنا البراندات التبويب الافتراضي لتسهيل العمل
-
   return (
     <div className="max-w-[1200px] mx-auto p-5 font-['Inter']">
-      {/* التبويبات العلوية */}
-      <div className="flex gap-5 mb-8 border-b border-gray-100">
-        <button 
-          onClick={() => setActiveTab('brands')}
-          className={`pb-3 px-2 text-[13px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${
-            activeTab === 'brands' ? 'border-b-2 border-black text-black' : 'border-b-2 border-transparent text-gray-400 hover:text-black'
-          }`}
-        >
-          <Tag size={16} /> Brands & Categories
-        </button>
-        <button 
-          onClick={() => setActiveTab('banners')}
-          className={`pb-3 px-2 text-[13px] font-bold tracking-[0.1em] uppercase transition-all flex items-center gap-2 ${
-            activeTab === 'banners' ? 'border-b-2 border-black text-black' : 'border-b-2 border-transparent text-gray-400 hover:text-black'
-          }`}
-        >
-          <ImageIcon size={16} /> Banners
-        </button>
-      </div>
-
-      <AnimatePresence mode="wait">
-        {activeTab === 'banners' ? (
-          <motion.div key="banners" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-            <BannersManager />
-          </motion.div>
-        ) : (
-          <motion.div key="brands" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
-            <BrandsManager />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <BannersManager />
     </div>
   );
 };
 
 // ==========================================
-// مكون إدارة البراندات والأقسام الكامل والمعدل
-// ==========================================
-const BrandsManager = () => {
-  const [brands, setBrands] = useState([]);
-  const [newBrandName, setNewBrandName] = useState('');
-  const [selectedBrand, setSelectedBrand] = useState(null);
-  
-  const [categoryName, setCategoryName] = useState('Rings');
-  const [imageFile, setImageFile] = useState(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const [brandCategories, setBrandCategories] = useState([]);
-
-  const categoryOptions = ['Rings', 'Necklaces', 'Bracelets', 'Earrings', 'Bangles'];
-
-  const fetchBrands = async () => {
-    try {
-      const { data, error } = await supabase.from('brands').select('*').order('created_at', { ascending: false });
-      if (!error && data) setBrands(data);
-    } catch (err) {
-      console.error("Error fetching brands:", err);
-    }
-  };
-
-  const fetchBrandCategories = async (brandId) => {
-    try {
-       const { data, error } = await supabase.from('brand_categories').select('*').eq('brand_id', brandId);
-       if (!error && data) setBrandCategories(data);
-    } catch (err) {
-       console.error("Error fetching categories:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchBrands();
-  }, []);
-
-  useEffect(() => {
-    if (selectedBrand?.id) {
-      fetchBrandCategories(selectedBrand.id);
-    } else {
-      setBrandCategories([]);
-    }
-  }, [selectedBrand]);
-
-  const handleAddBrand = async (e) => {
-    e.preventDefault();
-    if (!newBrandName.trim()) return;
-
-    try {
-       const { error } = await supabase.from('brands').insert([{ name: newBrandName.trim().toUpperCase() }]);
-       if (error) {
-          alert('Error adding brand: ' + error.message);
-       } else {
-          setNewBrandName('');
-          await fetchBrands();
-          alert('Brand added successfully! 🎉');
-       }
-    } catch (err) {
-       console.error(err);
-    }
-  };
-
-  const handleDeleteBrand = async (brandId) => {
-    if(!window.confirm('Are you sure you want to delete this brand and all its category images?')) return;
-    
-    try {
-       const { error } = await supabase.from('brands').delete().eq('id', brandId);
-       if (!error) {
-           if(selectedBrand?.id === brandId) setSelectedBrand(null);
-           await fetchBrands();
-       }
-    } catch (err) {
-       console.error(err);
-    }
-  };
-
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    if (!selectedBrand) return alert("Please select a brand from the buttons below first!");
-    if (!imageFile) return alert("Please upload an image first!");
-    
-    setIsUploading(true);
-    try {
-      const fileExt = imageFile.name.split('.').pop();
-      const fileName = `brand_${selectedBrand.id}_cat_${categoryName}_${Date.now()}.${fileExt}`;
-      
-      const { error: uploadError } = await supabase.storage.from('brand_category_images').upload(fileName, imageFile);
-      if (uploadError) throw uploadError;
-      
-      const { data: { publicUrl } } = supabase.storage.from('brand_category_images').getPublicUrl(fileName);
-      
-      const { error: insertError } = await supabase.from('brand_categories').insert([{ 
-         brand_id: selectedBrand.id, 
-         category_name: categoryName, 
-         image_url: publicUrl 
-      }]);
-
-      if (insertError) throw insertError;
-      
-      setImageFile(null);
-      const fileInput = document.getElementById('category-image-upload');
-      if(fileInput) fileInput.value = '';
-
-      await fetchBrandCategories(selectedBrand.id);
-      alert('Category Image Saved & Linked Perfectly! ✨');
-    } catch (error) {
-      console.error(error);
-      alert("Error: " + error.message);
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  return (
-    <div>
-      <header className="mb-10 text-center">
-        <h1 className="text-2xl font-extrabold tracking-widest uppercase mb-2">
-          Brand <span className="text-[#D4AF37]">Management</span>
-        </h1>
-        <p className="text-gray-500 text-xs">Dynamically add brands and assign category images</p>
-      </header>
-
-      {/* نموذج إضافة براند جديد */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)] mb-8">
-        <h3 className="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2 text-gray-700">
-          <FolderTree size={16} /> Add New Brand
-        </h3>
-        <form onSubmit={handleAddBrand} className="flex gap-3">
-          <input 
-            type="text" placeholder="e.g., CARTIER, KLEO" value={newBrandName} onChange={(e) => setNewBrandName(e.target.value)}
-            className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm outline-none focus:border-black transition-colors"
-          />
-          <button type="submit" className="bg-black text-white px-6 py-2.5 rounded-lg font-bold tracking-widest text-xs uppercase hover:bg-neutral-800 transition-colors">
-            Add Brand
-          </button>
-        </form>
-      </div>
-
-      {/* قائمة واختيار البراندات المضافة لتعديلها */}
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
-        <h3 className="text-xs font-bold uppercase tracking-widest mb-4 text-gray-700">Select Brand to Manage</h3>
-        
-        {brands.length === 0 ? (
-          <p className="text-gray-400 text-xs py-2">No brands available yet. Add your first brand above!</p>
-        ) : (
-          <div className="flex flex-wrap gap-3 mb-8">
-            {brands.map(b => (
-              <div key={b.id} className="flex items-center shadow-sm rounded-lg overflow-hidden border border-black/10">
-                <button 
-                  type="button"
-                  onClick={() => setSelectedBrand(b)}
-                  className={`px-4 py-2 text-[10px] font-bold tracking-widest uppercase transition-colors ${
-                    selectedBrand?.id === b.id ? 'bg-black text-white' : 'bg-white text-black hover:bg-gray-50'
-                  }`}
-                >
-                  {b.name}
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => handleDeleteBrand(b.id)}
-                  className="px-2.5 py-2 bg-white text-red-500 hover:bg-red-50 transition-colors border-l border-black/10"
-                >
-                  <Trash2 size={13} />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* إضافة الصور والأقسام للبراند المُختار */}
-        {selectedBrand && (
-          <div className="bg-[#fafafa] p-5 rounded-xl border border-gray-100">
-            <h4 className="text-xs font-bold uppercase tracking-widest mb-4 text-gray-500">
-              Add Categories to <span className="text-black font-extrabold">{selectedBrand.name}</span>
-            </h4>
-            
-            <form onSubmit={handleAddCategory} className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[180px]">
-                <label className="block text-[9px] font-bold tracking-widest uppercase mb-1.5 text-gray-400">Category Type</label>
-                <select value={categoryName} onChange={(e) => setCategoryName(e.target.value)} className="w-full p-2.5 bg-white border border-gray-200 rounded-lg text-xs outline-none focus:border-black">
-                  {categoryOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-                </select>
-              </div>
-              <div className="flex-1 min-w-[180px]">
-                <label className="block text-[9px] font-bold tracking-widest uppercase mb-1.5 text-gray-400">Category Image</label>
-                <input id="category-image-upload" type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files[0])} className="w-full p-1.5 text-xs border border-gray-200 rounded-lg bg-white outline-none" />
-              </div>
-              <button type="submit" disabled={isUploading} className="bg-[#D4AF37] text-white px-6 py-2.5 rounded-lg font-bold tracking-widest text-xs uppercase hover:bg-[#c4a133] transition-colors disabled:opacity-50 h-[38px]">
-                {isUploading ? 'Saving...' : 'Save Category'}
-              </button>
-            </form>
-
-            {/* عرض شبكة الصور الحالية المرفوعة للبراند */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 mt-8">
-              {brandCategories.map(cat => (
-                <div key={cat.id} className="relative group bg-white p-2 border border-gray-100 rounded-lg shadow-sm">
-                  <img src={cat.image_url} alt={cat.category_name} className="w-full aspect-[4/5] object-cover rounded mb-1.5" />
-                  <p className="text-center text-[9px] font-bold tracking-widest uppercase text-gray-700">{cat.category_name || cat.name}</p>
-                  <button 
-                    type="button"
-                    onClick={async () => {
-                      if(window.confirm('Delete this category image?')) {
-                          const { error } = await supabase.from('brand_categories').delete().eq('id', cat.id);
-                          if(!error) await fetchBrandCategories(selectedBrand.id);
-                      }
-                    }}
-                    className="absolute top-3 right-3 bg-red-500 text-white p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:scale-105"
-                  >
-                    <Trash2 size={11} />
-                  </button>
-                </div>
-              ))}
-            </div>
-            
-            {brandCategories.length === 0 && (
-              <p className="text-gray-400 text-xs text-center py-6">No category images added for this brand yet. Create some using the inputs above!</p>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ==========================================
-// مكون إدارة البنرات بالكامل (بدون حذف أي سطر)
+// مكون إدارة البنرات بالكامل (Desktop & Mobile)
 // ==========================================
 const BannersManager = () => {
   const [desktopImages, setDesktopImages] = useState([]);
@@ -353,7 +94,7 @@ const BannersManager = () => {
         <h1 className="text-2xl font-extrabold tracking-widest uppercase mb-2">
           Visual <span className="text-[#D4AF37]">Experience</span>
         </h1>
-        <p className="text-gray-500 text-xs">Curate the luxury aesthetic of your jewellery banners</p>
+        <p className="text-gray-500 text-xs">Manage website homepage hero banners</p>
       </header>
 
       {[

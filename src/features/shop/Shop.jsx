@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import CategoryTabs from './components/CategoryTabs';
 import ControlBar from './components/ControlBar';
@@ -9,7 +9,8 @@ import ShopProductGrid from './components/ShopProductGrid';
 import { products as dummyProducts } from '../../utils/data';
 
 const Shop = () => {
-  const { brandParam, categoryParam } = useParams();
+  const { categoryParam } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -21,18 +22,23 @@ const Shop = () => {
   const [selectedColors, setSelectedColors] = useState([]);
   const [availability, setAvailability] = useState('all');
 
-  const currentBrand = brandParam || 'KLEO';
-  const currentCategory = categoryParam || 'all';
+  // قراءة القسم المختار سواء من الـ URL Query (`?category=rings`) أو الـ Route Param (`/shop/rings`)
+  const queryCategory = searchParams.get('category');
+  const currentCategory = queryCategory || categoryParam || 'all';
 
   useEffect(() => {
     setSelectedTypes([]);
     setSelectedColors([]);
     setAvailability('all');
     setMaxPrice(400000);
-  }, [categoryParam, brandParam]);
+  }, [currentCategory]);
 
   const handleCategoryChange = (cat) => {
-    navigate(`/shop/${currentBrand}/${cat}`, { replace: true });
+    if (cat === 'all') {
+      navigate('/shop', { replace: true });
+    } else {
+      navigate(`/shop?category=${cat.toLowerCase()}`, { replace: true });
+    }
   };
 
   const handleResetFilters = () => {
@@ -42,9 +48,8 @@ const Shop = () => {
     setAvailability('all');
   };
 
-  // محرك التصفية الفعال
+  // محرك التصفية الفعال (بدون براندات)
   const filteredProducts = (dummyProducts || []).filter((product) => {
-    const matchesBrand = product.brand?.toUpperCase() === currentBrand.toUpperCase();
     const matchesCategory = currentCategory === 'all' || product.category?.toLowerCase() === currentCategory.toLowerCase();
     const matchesPrice = (product.price || 0) <= maxPrice;
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(product.type);
@@ -54,7 +59,7 @@ const Shop = () => {
     if (availability === 'inStock') matchesAvailability = product.inStock === true || (product.stock > 0);
     if (availability === 'outOfStock') matchesAvailability = product.inStock === false || (product.stock === 0);
 
-    return matchesBrand && matchesCategory && matchesPrice && matchesType && matchesColor && matchesAvailability;
+    return matchesCategory && matchesPrice && matchesType && matchesColor && matchesAvailability;
   });
 
   // محرك الترتيب
@@ -71,7 +76,6 @@ const Shop = () => {
       className="w-full min-h-screen bg-white pb-32" dir="ltr"
     >
       <CategoryTabs 
-        activeBrand={currentBrand} 
         activeCategory={currentCategory} 
         onCategoryChange={handleCategoryChange} 
       />
