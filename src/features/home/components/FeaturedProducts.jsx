@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../../../supabaseClient';
+import { supabase } from '../../../../supabaseClient';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
 import { Eye, ChevronLeft, ChevronRight } from 'lucide-react';
