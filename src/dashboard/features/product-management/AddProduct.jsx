@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { supabase } from '../../supabaseClient'; // اضبط المسار حسب مشروعك
+import { supabase } from '../../../../supabaseClient'; // اضبط المسار حسب مشروعك
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, X, Plus } from 'lucide-react';
 

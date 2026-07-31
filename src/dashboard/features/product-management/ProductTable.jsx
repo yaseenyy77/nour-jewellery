@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../supabaseClient'; // اضبط المسار حسب مشروعك
+import { supabase } from '../../../../supabaseClient'; // اضبط المسار حسب مشروعك
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Sparkles, RefreshCw, Plus } from 'lucide-react';
 
