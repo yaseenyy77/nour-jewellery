@@ -13,6 +13,11 @@ import ScrollToTop from './components/ScrollToTop';
 import AdminLayout from './dashboard/layout/AdminLayout'; 
 import Appearance from './dashboard/features/settings/Appearance'; 
 
+// 👇 تم إضافة استدعاء ملفات المنتجات هنا (تأكد إن المسارات دي مطابقة لمجلداتك) 👇
+import ProductTable from './dashboard/features/products/ProductTable';
+import AddProduct from './dashboard/features/products/AddProduct';
+import CategoryManager from './dashboard/features/products/CategoryManager';
+
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
   const footerRef = useRef(null);
@@ -42,9 +47,10 @@ function App() {
           <Route path="overview/charts" element={<div>Charts Page</div>} />
           
           <Route path="products" element={<></>} />
-          <Route path="products/table" element={<div>Products Table Page</div>} />
-          <Route path="products/add" element={<div>Add Product Page</div>} />
-          <Route path="products/categories" element={<div>Categories Page</div>} />
+          {/* 👇 تم التعديل هنا: ربط المسارات بالمكونات الحقيقية بدل النصوص الوهمية 👇 */}
+          <Route path="products/table" element={<ProductTable />} />
+          <Route path="products/add" element={<AddProduct />} />
+          <Route path="products/categories" element={<CategoryManager />} />
           
           <Route path="orders" element={<></>} />
           <Route path="orders/list" element={<div>Orders List</div>} />
