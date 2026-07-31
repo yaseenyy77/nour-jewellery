@@ -8,7 +8,6 @@ import {
   Settings2, CreditCard, Palette
 } from 'lucide-react';
 
-// هيكل الداش بورد بأسماء كاملة وواضحة تماماً بدون أي اختصارات
 const dashboardStructure = {
   '/admin/overview': { 
     title: 'OVERVIEW & ANALYTICS', 
@@ -61,18 +60,17 @@ const AdminLayout = () => {
       {/* السايد بار الثابت */}
       <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
       
-      {/* الحاوية الرئيسية مع ترك مساحة ثابتة للسايد بار على الشاشات الكبيرة */}
+      {/* الحاوية الرئيسية */}
       <div className="flex flex-col min-h-screen transition-all duration-500 lg:pl-64">
         
-        {/* شريط التنقل العلوي */}
-        <TopNav isSidebarOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+        {/* شريط التنقل العلوي (تم تصحيح الـ Prop لتفعيل الهامبرجر في الموبايل) */}
+        <TopNav isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
         
         {/* مساحة العمل ومحتوى الصفحات */}
         <main className="flex-1 p-6 md:p-10 lg:p-14 overflow-x-hidden">
           {currentCategory ? (
             <div className="animate-in fade-in-50 slide-in-from-bottom-2 duration-700">
               
-              {/* عنوان القسم بتصميم خطي معاصر */}
               <div className="mb-10 flex items-center gap-4">
                 <span className="w-10 h-[2px] bg-black block rounded-full"></span>
                 <h2 className="text-sm md:text-base font-black tracking-[0.25em] text-black uppercase">
@@ -80,7 +78,6 @@ const AdminLayout = () => {
                 </h2>
               </div>
               
-              {/* شبكة الأزرار بتصميم أبيض وأسود فاخر ومتجاوب */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {currentCategory.files.map((file, index) => (
                   <Link
@@ -88,7 +85,6 @@ const AdminLayout = () => {
                     to={file.path}
                     className="group relative flex items-center gap-5 p-6 bg-white border border-gray-100/80 rounded-2xl transition-all duration-500 hover:bg-black hover:border-black shadow-sm hover:shadow-xl hover:-translate-y-1 overflow-hidden"
                   >
-                    {/* الأيقونة داخل مربع مباين */}
                     <div className="p-3.5 bg-gray-50 rounded-xl text-black group-hover:bg-white/10 group-hover:text-white transition-all duration-500 group-hover:rotate-[6deg]">
                       {React.cloneElement(file.icon, { 
                         size: 22,
@@ -96,7 +92,6 @@ const AdminLayout = () => {
                       })}
                     </div>
                     
-                    {/* نصوص الزرار الكاملة */}
                     <div className="flex flex-col">
                       <span className="text-[11px] font-black tracking-widest text-black group-hover:text-white transition-colors duration-500 uppercase">
                         {file.name}
@@ -106,7 +101,6 @@ const AdminLayout = () => {
                       </span>
                     </div>
 
-                    {/* سهم صغير جمالي يظهر عند الهوفر */}
                     <div className="absolute right-6 opacity-0 group-hover:opacity-100 group-hover:right-5 transition-all duration-500 text-white text-xs font-serif">
                       →
                     </div>
@@ -115,10 +109,7 @@ const AdminLayout = () => {
               </div>
             </div>
           ) : (
-            /* في حالة الدخول للمسارات الفرعية الفعلية */
-            <div className="animate-in fade-in duration-500">
-               <Outlet />
-            </div>
+             <Outlet />
           )}
         </main>
       </div>
