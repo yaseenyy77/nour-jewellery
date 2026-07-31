@@ -1,294 +1,301 @@
 import React, { useState } from 'react';
-import { supabase } from '../../../../supabaseClient'; // اضبط المسار حسب مشروعك
+import { supabase } from '../../../../supabaseClient';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, X, Plus } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  UploadCloud, 
+  X, 
+  Save, 
+  Image as ImageIcon, 
+  CheckCircle2, 
+  AlertCircle 
+} from 'lucide-react';
 
 const AddProduct = () => {
   const navigate = useNavigate();
-
-  const initialFormState = {
+  
+  // حالة البيانات الأساسية (بدون سعر لأننا معرض)
+  const [formData, setFormData] = useState({
     name: '',
     category: 'rings',
-    type: 'Solitaire Ring',
-    brand: 'NOUR',
-    weight_grams: '',
-    karat: '18k',
-    material_color: 'Yellow Gold',
     description: '',
-    price: '',
-    old_price: '',
-    stock: 1,
-    in_stock: true,
-    is_featured: false,
-    is_new_arrival: true,
-    imageUrlInput: '',
-    images: [],
+    status: 'active'
+  });
+
+  // حالة الصور
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  
+  // حالة الرفع والتنبيهات
+  const [isUploading, setIsUploading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  // التعامل مع اختيار الصور
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    // إضافة الملفات للحالة
+    setSelectedFiles((prev) => [...prev, ...files]);
+
+    // عمل روابط معاينة للصور عشان تظهر في الواجهة قبل الرفع
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setPreviewUrls((prev) => [...prev, ...newPreviews]);
   };
 
-  const [formData, setFormData] = useState(initialFormState);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleAddImageUrl = () => {
-    if (!formData.imageUrlInput.trim()) return;
-    setFormData({
-      ...formData,
-      images: [...formData.images, formData.imageUrlInput.trim()],
-      imageUrlInput: '',
+  // إزالة صورة من المعاينة قبل الرفع
+  const removeImage = (indexToRemove) => {
+    setSelectedFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setPreviewUrls((prev) => {
+      // تنظيف الميموري
+      URL.revokeObjectURL(prev[indexToRemove]);
+      return prev.filter((_, index) => index !== indexToRemove);
     });
   };
 
-  const handleRemoveImage = (index) => {
-    setFormData({
-      ...formData,
-      images: formData.images.filter((_, i) => i !== index),
-    });
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // دالة الرفع للـ Bucket وحفظ البيانات
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || formData.images.length === 0) {
-      alert('الرجاء إدخال اسم المنتج، السعر، وصورة واحدة على الأقل');
+    if (!formData.name) {
+      setMessage({ type: 'error', text: 'Please enter the product name.' });
+      return;
+    }
+    if (selectedFiles.length === 0) {
+      setMessage({ type: 'error', text: 'Please select at least one image.' });
       return;
     }
 
-    setIsSubmitting(true);
+    setIsUploading(true);
+    setMessage({ type: '', text: '' });
+
     try {
-      const payload = {
-        name: formData.name,
-        category: formData.category,
-        type: formData.type,
-        brand: formData.brand || 'NOUR',
-        weight_grams: formData.weight_grams ? parseFloat(formData.weight_grams) : null,
-        karat: formData.karat,
-        material_color: formData.material_color,
-        description: formData.description,
-        price: parseFloat(formData.price),
-        old_price: formData.old_price ? parseFloat(formData.old_price) : null,
-        stock: parseInt(formData.stock) || 1,
-        in_stock: formData.in_stock,
-        is_featured: formData.is_featured,
-        is_new_arrival: formData.is_new_arrival,
-        images: formData.images,
-      };
+      const uploadedImageUrls = [];
 
-      const { error } = await supabase.from('products').insert([payload]);
-      if (error) throw error;
+      // 1. رفع كل صورة للـ Supabase Storage بالتتابع
+      for (const file of selectedFiles) {
+        // إنشاء اسم مميز للصورة عشان مفيش صورتين يحلوا محل بعض
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+        const filePath = `products/${fileName}`;
 
-      alert('تمت إضافة القطعة بنجاح! ✨');
-      navigate('/admin/products/table');
-    } catch (err) {
-      alert('حدث خطأ في الإضافة: ' + err.message);
+        // الرفع للـ Bucket اللي أنشأناه
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+
+        if (uploadError) throw uploadError;
+
+        // جلب الرابط العام للصورة بعد الرفع
+        const { data: publicUrlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
+
+        uploadedImageUrls.push(publicUrlData.publicUrl);
+      }
+
+      // 2. حفظ بيانات المنتج مع مصفوفة الروابط في قاعدة البيانات
+      const { error: insertError } = await supabase
+        .from('products')
+        .insert([{
+          name: formData.name,
+          category: formData.category,
+          description: formData.description,
+          status: formData.status,
+          images: uploadedImageUrls, // مصفوفة الروابط كاملة
+        }]);
+
+      if (insertError) throw insertError;
+
+      // نجاح العملية
+      setMessage({ type: 'success', text: 'Product added successfully to your gallery!' });
+      
+      // تفريغ الفورم بعد 2 ثانية وتوجيهه لجدول المنتجات
+      setTimeout(() => {
+        navigate('/admin/products/table');
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error during upload/insert:', error);
+      setMessage({ type: 'error', text: error.message || 'Failed to add product.' });
     } finally {
-      setIsSubmitting(false);
+      setIsUploading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4 pb-6 border-b border-gray-100">
-        <Link
-          to="/admin/products"
-          className="p-2 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all text-gray-600"
-        >
-          <ArrowLeft size={16} />
-        </Link>
-        <div>
-          <h1 className="text-xl font-serif font-bold tracking-widest uppercase text-black">
-            Add New Fine Jewelry Piece
-          </h1>
-          <p className="text-[10px] text-gray-400 uppercase tracking-wider mt-0.5">
-            Fill in details to list product in store
-          </p>
+    <div className="max-w-5xl mx-auto space-y-8 animate-fade-in pb-10">
+      
+      {/* Header Section */}
+      <div className="flex items-center justify-between pb-6 border-b border-gray-100">
+        <div className="flex items-center gap-4">
+          <Link to="/admin/products/table" className="p-2 border border-gray-200 rounded-full hover:bg-black hover:text-white transition-all">
+            <ArrowLeft size={16} />
+          </Link>
+          <div>
+            <h1 className="text-2xl font-serif font-bold tracking-widest uppercase">Add New Piece</h1>
+            <p className="text-xs text-gray-400 uppercase tracking-wider mt-1">Add a new item to the jewelry gallery</p>
+          </div>
         </div>
+        <button 
+          onClick={handleSubmit}
+          disabled={isUploading}
+          className={`flex items-center gap-2 px-6 py-3 bg-black text-white text-xs font-bold uppercase tracking-widest rounded-full transition-all ${isUploading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-800 hover:shadow-lg'}`}
+        >
+          {isUploading ? 'Uploading...' : 'Save Product'}
+          {!isUploading && <Save size={14} />}
+        </button>
       </div>
 
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl border border-gray-100 shadow-sm space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Piece Name *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="e.g. Royal Gold Necklace"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Category *
-            </label>
-            <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black uppercase font-semibold rounded-lg"
-            >
-              <option value="rings">Rings</option>
-              <option value="necklaces">Necklaces</option>
-              <option value="bracelets">Bracelets</option>
-              <option value="earrings">Earrings</option>
-              <option value="bangles">Bangles</option>
-            </select>
-          </div>
+      {/* Messages */}
+      {message.text && (
+        <div className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
+          message.type === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200'
+        }`}>
+          {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
+          {message.text}
         </div>
+      )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Gold Karat
-            </label>
-            <select
-              value={formData.karat}
-              onChange={(e) => setFormData({ ...formData, karat: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black rounded-lg"
-            >
-              <option value="18k">18k Gold</option>
-              <option value="21k">21k Gold</option>
-              <option value="24k">24k Gold</option>
-              <option value="Diamond">Diamond</option>
-            </select>
-          </div>
+      <form className="grid grid-cols-1 lg:grid-cols-3 gap-8" onSubmit={handleSubmit}>
+        
+        {/* Left Column: Form Fields */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+            <h2 className="text-sm font-bold uppercase tracking-widest border-b border-gray-100 pb-4 mb-6">Basic Information</h2>
+            
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Piece Name *</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleInputChange}
+                required
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                placeholder="e.g. Royal Diamond Ring"
+              />
+            </div>
 
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Weight (Grams)
-            </label>
-            <input
-              type="number"
-              step="0.001"
-              placeholder="e.g. 5.250"
-              value={formData.weight_grams}
-              onChange={(e) => setFormData({ ...formData, weight_grams: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Material Color
-            </label>
-            <select
-              value={formData.material_color}
-              onChange={(e) => setFormData({ ...formData, material_color: e.target.value })}
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black rounded-lg"
-            >
-              <option value="Yellow Gold">Yellow Gold</option>
-              <option value="White Gold">White Gold</option>
-              <option value="Rose Gold">Rose Gold</option>
-            </select>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/80 p-4 border border-gray-100 rounded-lg">
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Current Price (LE) *
-            </label>
-            <input
-              type="number"
-              required
-              placeholder="e.g. 25000"
-              value={formData.price}
-              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-gray-200 text-xs focus:outline-none focus:border-black font-bold rounded-lg"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-              Old Price (LE) - <span className="text-gray-400 font-normal">Sale badge will show if set</span>
-            </label>
-            <input
-              type="number"
-              placeholder="e.g. 30000"
-              value={formData.old_price}
-              onChange={(e) => setFormData({ ...formData, old_price: e.target.value })}
-              className="w-full px-4 py-3 bg-white border border-gray-200 text-xs focus:outline-none focus:border-black text-gray-400 rounded-lg"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-[10px] font-bold uppercase tracking-widest text-gray-500 mb-2">
-            Image URLs (JPG, PNG, WEBP) *
-          </label>
-          <div className="flex gap-2 mb-3">
-            <input
-              type="text"
-              placeholder="Paste image link"
-              value={formData.imageUrlInput}
-              onChange={(e) => setFormData({ ...formData, imageUrlInput: e.target.value })}
-              className="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 text-xs focus:outline-none focus:border-black rounded-lg"
-            />
-            <button
-              type="button"
-              onClick={handleAddImageUrl}
-              className="px-6 bg-black text-white text-xs font-bold uppercase tracking-wider hover:bg-neutral-800 rounded-lg"
-            >
-              Add
-            </button>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            {formData.images.map((img, idx) => (
-              <div key={idx} className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden group">
-                <img src={img} alt="" className="w-full h-full object-cover" />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveImage(idx)}
-                  className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Category</label>
+                <select
+                  name="category"
+                  value={formData.category}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black appearance-none transition-all"
                 >
-                  <X size={14} />
-                </button>
+                  <option value="rings">Rings</option>
+                  <option value="necklaces">Necklaces</option>
+                  <option value="bracelets">Bracelets</option>
+                  <option value="earrings">Earrings</option>
+                  <option value="bangles">Bangles</option>
+                </select>
               </div>
-            ))}
+              
+              <div className="space-y-2">
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Visibility Status</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black appearance-none transition-all"
+                >
+                  <option value="active">Active (Visible in Gallery)</option>
+                  <option value="draft">Draft (Hidden)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Description & Details</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                rows="5"
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all resize-none"
+                placeholder="Describe the piece, materials used, karat, etc..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-6 pt-2">
-          <label className="flex items-center gap-2 cursor-pointer text-xs">
-            <input
-              type="checkbox"
-              checked={formData.is_featured}
-              onChange={(e) => setFormData({ ...formData, is_featured: e.target.checked })}
-              className="accent-black w-4 h-4"
-            />
-            <span className="font-semibold text-gray-700">Show on Home Slider</span>
-          </label>
+        {/* Right Column: Image Upload Multi */}
+        <div className="space-y-6">
+          <div className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
+              <h2 className="text-sm font-bold uppercase tracking-widest">Gallery Images</h2>
+              <span className="text-[10px] bg-gray-100 px-2 py-1 rounded-md font-bold text-gray-500">{selectedFiles.length} Selected</span>
+            </div>
 
-          <label className="flex items-center gap-2 cursor-pointer text-xs">
-            <input
-              type="checkbox"
-              checked={formData.in_stock}
-              onChange={(e) => setFormData({ ...formData, in_stock: e.target.checked })}
-              className="accent-black w-4 h-4"
-            />
-            <span className="font-semibold text-gray-700">In Stock</span>
-          </label>
+            {/* Upload Area */}
+            <div className="relative border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:border-black transition-colors bg-gray-50/50 group cursor-pointer">
+              <input 
+                type="file" 
+                multiple 
+                accept="image/png, image/jpeg, image/webp"
+                onChange={handleFileChange}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+              />
+              <div className="bg-white p-3 rounded-full shadow-sm mb-4 group-hover:scale-110 transition-transform">
+                <UploadCloud size={24} className="text-black" />
+              </div>
+              <p className="text-xs font-bold uppercase mb-1">Click or drag images here</p>
+              <p className="text-[10px] text-gray-400 uppercase">You can select multiple files</p>
+            </div>
+
+            {/* Preview Grid */}
+            {previewUrls.length > 0 ? (
+              <div className="mt-6 grid grid-cols-2 gap-3 auto-rows-max overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
+                {previewUrls.map((url, index) => (
+                  <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-square">
+                    <img 
+                      src={url} 
+                      alt={`Preview ${index}`} 
+                      className="w-full h-full object-cover"
+                    />
+                    {/* طبقة سوداء عند الوقوف بالماوس للحذف */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <button 
+                        type="button"
+                        onClick={() => removeImage(index)}
+                        className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors transform scale-75 group-hover:scale-100"
+                        title="Remove Image"
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    {/* رقم الصورة كترتيب */}
+                    <div className="absolute top-2 left-2 bg-black/70 text-white text-[9px] font-bold px-1.5 py-0.5 rounded backdrop-blur-sm">
+                      {index + 1}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-8 flex flex-col items-center justify-center text-gray-300 flex-1">
+                <ImageIcon size={48} className="mb-3 opacity-20" />
+                <p className="text-[10px] font-bold uppercase tracking-widest text-center px-4">No images selected yet. The gallery needs art.</p>
+              </div>
+            )}
+            
+          </div>
         </div>
 
-        <div className="pt-6 border-t border-gray-100 flex items-center justify-end gap-4">
-          <Link
-            to="/admin/products"
-            className="px-6 py-3 text-xs font-bold tracking-widest uppercase text-gray-400 hover:text-black"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="px-8 py-3 bg-black text-white text-xs font-bold tracking-[0.2em] uppercase hover:bg-neutral-800 transition-all rounded-lg disabled:opacity-50"
-          >
-            {isSubmitting ? 'Saving...' : 'Save Product'}
-          </button>
-        </div>
       </form>
+
+      <style jsx>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+      `}</style>
     </div>
   );
 };
