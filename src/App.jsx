@@ -13,10 +13,10 @@ import ScrollToTop from './components/ScrollToTop';
 import AdminLayout from './dashboard/layout/AdminLayout'; 
 import Appearance from './dashboard/features/settings/Appearance'; 
 
-// 👇 تم إضافة استدعاء ملفات المنتجات هنا (تأكد إن المسارات دي مطابقة لمجلداتك) 👇
-import ProductTable from './dashboard/features/products/ProductTable';
-import AddProduct from './dashboard/features/products/AddProduct';
-import CategoryManager from './dashboard/features/products/CategoryManager';
+// 👇 المسارات الصحيحة بناءً على شجرة الملفات عندك (product-management) 👇
+import ProductTable from './dashboard/features/product-management/ProductTable';
+import AddProduct from './dashboard/features/product-management/AddProduct';
+import CategoryManager from './dashboard/features/product-management/CategoryManager';
 
 function App() {
   const [showBottomNav, setShowBottomNav] = useState(true);
@@ -47,7 +47,7 @@ function App() {
           <Route path="overview/charts" element={<div>Charts Page</div>} />
           
           <Route path="products" element={<></>} />
-          {/* 👇 تم التعديل هنا: ربط المسارات بالمكونات الحقيقية بدل النصوص الوهمية 👇 */}
+          {/* ربط المسارات بالمكونات الحقيقية */}
           <Route path="products/table" element={<ProductTable />} />
           <Route path="products/add" element={<AddProduct />} />
           <Route path="products/categories" element={<CategoryManager />} />
