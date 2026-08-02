@@ -15,13 +15,14 @@ const ShopProductGrid = ({
   const navigate = useNavigate();
   const { favorites: contextFavorites, addToWishlist, removeFromWishlist } = useWishlist();
 
+  // تقليل المسافات في الموبايل (gap-x-3 و gap-y-8) عشان الكارد ياخد مساحة أكبر ويبقى أوضح
   const getGridClasses = () => {
     switch (gridCols) {
       case 1: return 'grid-cols-1 gap-y-12';
-      case 2: return 'grid-cols-2 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
-      case 3: return 'grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
+      case 2: return 'grid-cols-2 gap-x-3 md:gap-x-6 gap-y-8 md:gap-y-16';
+      case 3: return 'grid-cols-2 md:grid-cols-3 gap-x-3 md:gap-x-6 gap-y-8 md:gap-y-16';
       case 4:
-      default: return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
+      default: return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-3 md:gap-x-6 gap-y-8 md:gap-y-16';
     }
   };
 
@@ -86,13 +87,13 @@ const ShopProductGrid = ({
               <img
                 src={mainImage}
                 alt={product.name || 'Nour Jewellery Product'}
-                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-108"
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
               />
 
-              {/* أزرار الموبايل */}
+              {/* أزرار الموبايل (ظاهرة دائماً على الشاشات الصغيرة) */}
               {!isSingleCol && (
                 <>
-                  <div className="absolute top-2.5 left-2.5 flex lg:hidden z-20">
+                  <div className="absolute top-2 left-2 flex lg:hidden z-20">
                     <button 
                       type="button"
                       onClick={handleFavoriteClick}
@@ -105,7 +106,7 @@ const ShopProductGrid = ({
                     </button>
                   </div>
 
-                  <div className="absolute bottom-2.5 right-2.5 flex lg:hidden items-center gap-1.5 z-20">
+                  <div className="absolute bottom-2 right-2 flex lg:hidden items-center gap-1.5 z-20">
                     <button 
                       type="button"
                       onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
@@ -118,10 +119,10 @@ const ShopProductGrid = ({
                 </>
               )}
 
-              {/* أزرار الكمبيوتر */}
+              {/* أزرار الكمبيوتر (تظهر عند الـ Hover فقط) */}
               {!isSingleCol && (
                 <>
-                  <div className="absolute top-4 left-4 hidden lg:flex flex-col gap-2.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 -translate-x-2 group-hover/card:translate-x-0">
+                  <div className="absolute top-3 left-3 hidden lg:flex flex-col gap-2.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 -translate-x-2 group-hover/card:translate-x-0">
                     <button 
                       type="button"
                       onClick={handleFavoriteClick}
@@ -161,13 +162,13 @@ const ShopProductGrid = ({
             {/* تفاصيل المنتج */}
             <div className={`flex flex-col items-start text-left justify-center flex-1 w-full ${isSingleCol ? 'px-4 md:px-0' : 'pt-3 lg:pt-5 px-1'}`}>
               <div className={`flex items-center gap-2 ${isSingleCol ? 'mb-3' : 'mb-1.5 lg:mb-2'}`}>
-                <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.35em]' : 'text-[8px] lg:text-[9px] tracking-[0.25em] lg:tracking-[0.3em]'}`}>
+                <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.35em]' : 'text-[9px] tracking-[0.25em]'}`}>
                   {product.karat ? `${product.karat} GOLD` : 'NOUR JEWELLERY'}
                 </span>
                 {product.weight && (
                   <>
                     <span className="w-[3px] h-[3px] rounded-full bg-[#aaa]"></span>
-                    <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.25em]' : 'text-[8px] lg:text-[9px] tracking-[0.2em]'}`}>
+                    <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.25em]' : 'text-[9px] tracking-[0.2em]'}`}>
                       {product.weight}G
                     </span>
                   </>
@@ -175,7 +176,7 @@ const ShopProductGrid = ({
               </div>
 
               <h3 className={`font-serif font-medium text-black uppercase transition-colors duration-300 group-hover:text-[#555] ${
-                isSingleCol ? 'text-xl md:text-2xl tracking-widest' : 'text-[12px] lg:text-[14px] tracking-wider truncate w-full'
+                isSingleCol ? 'text-xl md:text-2xl tracking-widest' : 'text-[13px] lg:text-[14px] tracking-wider truncate w-full'
               }`}>
                 {product.name}
               </h3>
