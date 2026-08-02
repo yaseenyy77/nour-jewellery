@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiX, FiPlus, FiMinus, FiPhone, FiMail, FiHeart, FiSearch, FiUser, FiGrid } from 'react-icons/fi';
+import { FiX, FiPlus, FiMinus, FiPhone, FiMail, FiHeart, FiSearch, FiUser, FiGrid, FiMapPin } from 'react-icons/fi';
 
 const MegaMenu = ({ isOpen, onClose }) => {
-  // 1. جعل MENU هي التبويب الافتراضي عند الفتح
   const [activeTab, setActiveTab] = useState('MENU');
   const [expandedItem, setExpandedItem] = useState(null);
   const navigate = useNavigate();
@@ -45,7 +44,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
     },
     { 
       title: "Our Locations", 
-      icon: null, 
+      icon: <FiMapPin size={18} strokeWidth={1.5} />, 
       hasPlus: false, 
       action: () => { onClose(); navigate('/locations'); } 
     },
@@ -97,7 +96,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
           <FiX size={24} strokeWidth={1.5} />
         </button>
 
-        {/* 2. التبويبات العلويّة (MENU على الشمال ثم CATEGORIES على اليمين) */}
+        {/* التبويبات العلويّة */}
         <div className="flex border-b border-gray-200 mt-12">
           <button 
             onClick={() => setActiveTab('MENU')} 
@@ -113,7 +112,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* محتوى القائمة - LTR محاذاة لليسار */}
+        {/* محتوى القائمة */}
         <div className="flex-1 overflow-y-auto no-scrollbar bg-white">
           {activeTab === 'CATEGORIES' ? (
             <ul className="flex flex-col text-left">
@@ -201,7 +200,7 @@ const MegaMenu = ({ isOpen, onClose }) => {
                 <FiUser size={18} className="text-gray-600" />
               </li>
 
-              {/* التواصل LTR */}
+              {/* التواصل */}
               <div className="p-6 mt-4 text-left border-t border-gray-100">
                 <h4 className="text-[11px] font-bold text-gray-900 mb-4 uppercase tracking-[0.2em]">CONTACT NOUR GOLD</h4>
                 <div className="flex flex-col gap-3">

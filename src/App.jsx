@@ -6,9 +6,12 @@ import Footer from './components/layout/Footer/Footer';
 import Home from './features/home/Home';
 import Shop from './features/shop/Shop';
 
-// 1. استيراد الـ Wishlist Context ومكون الـ Wishlist (المسار المظبوط بالضبط)
+// 1. استيراد الـ Wishlist Context ومكون الـ Wishlist
 import { WishlistProvider } from './context/WishlistContext';
 import Wishlist from './features/wishlist/Wishlist';
+
+// 2. استيراد صفحة الفروع (Locations) من المسار الصحيح
+import Locations from './features/locations/Locations';
 
 // استيراد المكون الجديد اللي هيطلعنا لأول الصفحة
 import ScrollToTop from './components/ScrollToTop';
@@ -88,6 +91,9 @@ function App() {
 
                     {/* مسار صفحة المفضلة Wishlist */}
                     <Route path="/wishlist" element={<Wishlist />} />
+
+                    {/* مسار صفحة الفروع Locations الجديد */}
+                    <Route path="/locations" element={<Locations />} />
                   </Routes>
                 </main>
                 <div ref={footerRef}>
