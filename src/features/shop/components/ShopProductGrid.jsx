@@ -3,6 +3,9 @@ import { motion } from 'framer-motion';
 import { Eye, Heart, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+// استيراد الـ Wishlist Context
+import { useWishlist } from '../../../context/WishlistContext';
+
 const ShopProductGrid = ({ 
   products = [], 
   gridCols = 4, 
@@ -10,6 +13,7 @@ const ShopProductGrid = ({
   onToggleFavorite 
 }) => {
   const navigate = useNavigate();
+  const { favorites: contextFavorites, addToWishlist, removeFromWishlist } = useWishlist();
 
   const getGridClasses = () => {
     switch (gridCols) {
@@ -37,7 +41,24 @@ const ShopProductGrid = ({
     <div className={`grid ${getGridClasses()}`}>
       {products.map((product, idx) => {
         const mainImage = product.images?.[0] || product.image || 'https://via.placeholder.com/400';
-        const isFav = favorites.includes(product.id);
+
+        const activeList = favorites.length > 0 ? favorites : contextFavorites;
+        const isFav = activeList?.some(
+          (item) => String(typeof item === 'object' ? item.id : item) === String(product.id)
+        );
+
+        const handleFavoriteClick = (e) => {
+          e.stopPropagation();
+          if (onToggleFavorite) {
+            onToggleFavorite(product.id);
+          } else {
+            if (isFav) {
+              removeFromWishlist(product.id);
+            } else {
+              addToWishlist(product);
+            }
+          }
+        };
 
         return (
           <motion.div
@@ -62,35 +83,31 @@ const ShopProductGrid = ({
                 isSingleCol ? 'w-full md:w-[350px] aspect-[4/5]' : 'w-full aspect-[4/5]'
               }`}
             >
-              {/* صورة المنتج */}
               <img
                 src={mainImage}
                 alt={product.name || 'Nour Jewellery Product'}
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-108"
               />
 
-              {/* ===================== أزرار الموبايل (Mobile View) ===================== */}
+              {/* أزرار الموبايل */}
               {!isSingleCol && (
                 <>
-                  {/* زر المفضلة - أعلى اليسار */}
                   <div className="absolute top-2.5 left-2.5 flex lg:hidden z-20">
                     <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        onToggleFavorite && onToggleFavorite(product.id);
-                      }}
+                      type="button"
+                      onClick={handleFavoriteClick}
                       className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-sm active:scale-90 transition-all ${
                         isFav ? 'bg-white text-red-600' : 'bg-white/90 text-gray-700'
                       }`}
-                      title="Add to Favorites"
+                      title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                     >
                       <Heart size={15} strokeWidth={1.8} className={isFav ? "fill-red-600 text-red-600" : ""} />
                     </button>
                   </div>
 
-                  {/* زر المعاينة - أسفل اليمين */}
                   <div className="absolute bottom-2.5 right-2.5 flex lg:hidden items-center gap-1.5 z-20">
                     <button 
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
                       className="w-8 h-8 rounded-full bg-white/95 text-black backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform"
                       title="Quick View"
@@ -101,24 +118,22 @@ const ShopProductGrid = ({
                 </>
               )}
 
-              {/* ===================== أزرار الكمبيوتر (Desktop Hover View) ===================== */}
+              {/* أزرار الكمبيوتر */}
               {!isSingleCol && (
                 <>
-                  {/* الأزرار العائمة على الجنب (مفضلة وتكبير) */}
                   <div className="absolute top-4 left-4 hidden lg:flex flex-col gap-2.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 -translate-x-2 group-hover/card:translate-x-0">
                     <button 
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        onToggleFavorite && onToggleFavorite(product.id);
-                      }}
+                      type="button"
+                      onClick={handleFavoriteClick}
                       className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
                         isFav ? 'bg-white text-red-600' : 'bg-white/90 text-gray-600 hover:text-red-600 hover:bg-white'
                       }`}
-                      title="Add to Favorites"
+                      title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                     >
-                      <Heart size={17} strokeWidth={1.5} className={isFav ? "fill-red-600 text-red-600" : ""} />
+                      <Heart size={17} strokeWidth={1.8} className={isFav ? "fill-red-600 text-red-600" : ""} />
                     </button>
                     <button 
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); }}
                       className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-black hover:bg-white shadow-sm transition-all duration-300 hover:scale-110"
                       title="Zoom Image"
@@ -127,9 +142,9 @@ const ShopProductGrid = ({
                     </button>
                   </div>
 
-                  {/* زرار المعاينة السريعة الموحد في المنتصف */}
                   <div className="absolute inset-0 hidden lg:flex flex-col items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 bg-black/10 backdrop-blur-[2px] z-10">
                     <button 
+                      type="button"
                       onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
                       className="relative w-[145px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-black hover:text-white group/btn1 overflow-hidden flex items-center justify-center shadow-lg translate-y-2 group-hover/card:translate-y-0"
                     >
@@ -143,7 +158,7 @@ const ShopProductGrid = ({
               )}
             </div>
 
-            {/* تفاصيل المنتج (بدون أسعار) */}
+            {/* تفاصيل المنتج */}
             <div className={`flex flex-col items-start text-left justify-center flex-1 w-full ${isSingleCol ? 'px-4 md:px-0' : 'pt-3 lg:pt-5 px-1'}`}>
               <div className={`flex items-center gap-2 ${isSingleCol ? 'mb-3' : 'mb-1.5 lg:mb-2'}`}>
                 <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.35em]' : 'text-[8px] lg:text-[9px] tracking-[0.25em] lg:tracking-[0.3em]'}`}>

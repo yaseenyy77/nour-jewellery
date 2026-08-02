@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../../../supabaseClient';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import { Eye, ChevronLeft, ChevronRight, Heart, Maximize2, ShoppingCart } from 'lucide-react';
+import { Eye, ChevronLeft, ChevronRight, Heart, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+// استيراد الـ Wishlist Context
+import { useWishlist } from '../../../context/WishlistContext';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -14,6 +17,9 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+
+  // جلب دالة إضافة/حذف وقائمة المفضلة من الـ Context
+  const { favorites, addToWishlist, removeFromWishlist } = useWishlist();
 
   useEffect(() => {
     const fetchCategoryProducts = async () => {
@@ -72,13 +78,25 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
             const hasSale = product.old_price && product.old_price > product.price;
             const mainImg = product.images?.[0] || 'https://via.placeholder.com/400';
 
+            // التأكد إذا كان المنتج في المفضلة باستخدام String ضماناً للنوع
+            const isFav = favorites?.some((item) => String(item.id) === String(product.id));
+
+            const handleToggleWishlist = (e) => {
+              e.stopPropagation();
+              if (isFav) {
+                removeFromWishlist(product.id);
+              } else {
+                addToWishlist(product);
+              }
+            };
+
             return (
               <SwiperSlide key={product.id}>
                 <motion.div 
                   className="group cursor-pointer flex flex-col"
                   onClick={() => navigate(`/product/${product.id}`)}
                 >
-                  {/* حاوية الصورة وتأثيرات الأنميشن */}
+                  {/* حاوية الصورة */}
                   <div className="relative aspect-[4/5] bg-[#fdfdfd] mb-2 overflow-hidden flex items-center justify-center group/img border border-gray-50">
                     {/* شارة الخصم */}
                     {hasSale && (
@@ -96,14 +114,18 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
                     {/* أيقونات المفضلة والزووم */}
                     <div className="absolute top-4 left-4 flex flex-col gap-3 opacity-0 group-hover/img:opacity-100 transition-all duration-500 z-20">
                       <button 
-                        onClick={(e) => { e.stopPropagation(); /* كود الإضافة للمفضلة */ }} 
-                        className="text-gray-400 hover:text-red-700 hover:scale-110 transition-all duration-300"
-                        title="Add to Favorites"
+                        type="button"
+                        onClick={handleToggleWishlist} 
+                        className={`transition-all duration-300 hover:scale-125 ${
+                          isFav ? 'text-red-600' : 'text-gray-400 hover:text-red-600'
+                        }`}
+                        title={isFav ? "Remove from Favorites" : "Add to Favorites"}
                       >
-                        <Heart size={20} strokeWidth={1.5} />
+                        <Heart size={20} strokeWidth={1.8} className={isFav ? "fill-red-600 text-red-600" : ""} />
                       </button>
                       <button 
-                        onClick={(e) => { e.stopPropagation(); /* كود التكبير */ }}
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); }}
                         className="text-gray-400 hover:text-black hover:scale-110 transition-all duration-300"
                         title="Zoom Image"
                       >
@@ -111,27 +133,20 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
                       </button>
                     </div>
 
-                    {/* زراير Quick View و Quick Shop */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity duration-500 bg-black/5 z-10">
+                    {/* زر Quick View فقط (تمت إزالة Quick Shop) */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity duration-500 bg-black/5 z-10">
                       <button 
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
                         className="relative w-[140px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-[#1a1a1a] group/btn1 overflow-hidden flex items-center justify-center shadow-md translate-y-4 group-hover/img:translate-y-0"
                       >
                         <span className="text-[12px] font-medium tracking-wide text-black group-hover/btn1:opacity-0 transition-opacity duration-300">Quick view</span>
                         <Eye size={18} className="absolute text-white opacity-0 translate-y-4 group-hover/btn1:opacity-100 group-hover/btn1:translate-y-0 transition-all duration-300" />
                       </button>
-
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); /* كود إضافة للسلة */ }}
-                        className="relative w-[140px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-[#1a1a1a] group/btn2 overflow-hidden flex items-center justify-center shadow-md translate-y-4 group-hover/img:translate-y-0 delay-75"
-                      >
-                        <span className="text-[12px] font-medium tracking-wide text-black group-hover/btn2:opacity-0 transition-opacity duration-300">Quick Shop</span>
-                        <ShoppingCart size={18} className="absolute text-white opacity-0 translate-y-4 group-hover/btn2:opacity-100 group-hover/btn2:translate-y-0 transition-all duration-300" />
-                      </button>
                     </div>
                   </div>
 
-                  {/* تفاصيل المنتج المعروضة بأناقة (الرمادي الغامق والأسود) */}
+                  {/* تفاصيل المنتج */}
                   <div className="pt-4 px-1 flex flex-col items-start text-left">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-[9px] font-bold text-[#555] tracking-[0.3em] uppercase">
