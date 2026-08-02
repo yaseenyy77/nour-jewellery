@@ -1,36 +1,54 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Eye, Heart, Maximize2, ShoppingCart } from 'lucide-react';
+import { Eye, Heart, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-const ShopProductGrid = ({ products, gridCols }) => {
+const ShopProductGrid = ({ 
+  products = [], 
+  gridCols = 4, 
+  favorites = [], 
+  onToggleFavorite 
+}) => {
   const navigate = useNavigate();
 
   const getGridClasses = () => {
     switch (gridCols) {
       case 1: return 'grid-cols-1 gap-y-12';
-      case 2: return 'grid-cols-2 gap-x-6 gap-y-16';
-      case 3: return 'grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-16';
+      case 2: return 'grid-cols-2 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
+      case 3: return 'grid-cols-2 md:grid-cols-3 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
       case 4:
-      default: return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-16';
+      default: return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-6 gap-y-10 md:gap-y-16';
     }
   };
 
   const isSingleCol = gridCols === 1;
 
+  if (!products || products.length === 0) {
+    return (
+      <div className="text-center py-24 bg-neutral-50 rounded-2xl border border-gray-100 my-4">
+        <p className="text-xs text-neutral-400 uppercase tracking-[0.2em]">
+          No products found matching your selection.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className={`grid ${getGridClasses()}`}>
       {products.map((product, idx) => {
-        const hasSale = product.old_price && product.old_price > product.price;
         const mainImage = product.images?.[0] || product.image || 'https://via.placeholder.com/400';
+        const isFav = favorites.includes(product.id);
 
         return (
           <motion.div
-            layout
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: idx * 0.04 }}
-            key={product.id || idx}
+            key={`${product.id || idx}-${gridCols}`}
+            initial={{ opacity: 0, y: 15, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ 
+              duration: 0.35, 
+              ease: [0.25, 0.1, 0.25, 1.0],
+              delay: idx * 0.035 
+            }}
             className={`group cursor-pointer ${
               isSingleCol
                 ? 'flex flex-col md:flex-row items-center gap-8 md:gap-16 pb-10 border-b border-gray-100'
@@ -38,96 +56,114 @@ const ShopProductGrid = ({ products, gridCols }) => {
             }`}
             onClick={() => navigate(`/product/${product.id}`)}
           >
-            {/* حاوية الصورة وتأثيرات الهوفر */}
+            {/* حاوية الصورة */}
             <div
-              className={`relative bg-[#fdfdfd] overflow-hidden flex items-center justify-center shrink-0 group/img border border-gray-50 ${
+              className={`relative bg-[#fdfdfd] overflow-hidden flex items-center justify-center shrink-0 border border-gray-100 group/card ${
                 isSingleCol ? 'w-full md:w-[350px] aspect-[4/5]' : 'w-full aspect-[4/5]'
               }`}
             >
-              {/* شارة الخصم */}
-              {hasSale && (
-                <div className="absolute top-4 right-4 z-10 bg-black text-white text-[9px] font-bold tracking-[0.25em] uppercase px-3.5 py-2 shadow-sm">
-                  SALE
-                </div>
-              )}
-
+              {/* صورة المنتج */}
               <img
                 src={mainImage}
-                alt={product.name}
-                className="w-full h-full object-cover transition-transform duration-[1.5s] ease-[cubic-bezier(0.25,1,0.5,1)] group-hover/img:scale-110"
+                alt={product.name || 'Nour Jewellery Product'}
+                className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-108"
               />
 
-              {/* تأثيرات الهوفر */}
+              {/* ===================== أزرار الموبايل (Mobile View) ===================== */}
               {!isSingleCol && (
                 <>
-                  <div className="absolute top-4 left-4 flex flex-col gap-3 opacity-0 group-hover/img:opacity-100 transition-all duration-500 z-20">
+                  {/* زر المفضلة - أعلى اليسار */}
+                  <div className="absolute top-2.5 left-2.5 flex lg:hidden z-20">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); /* كود إضافة مفضلة */ }}
-                      className="text-gray-400 hover:text-red-700 hover:scale-110 transition-all duration-300"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        onToggleFavorite && onToggleFavorite(product.id);
+                      }}
+                      className={`w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center shadow-sm active:scale-90 transition-all ${
+                        isFav ? 'bg-white text-red-600' : 'bg-white/90 text-gray-700'
+                      }`}
                       title="Add to Favorites"
                     >
-                      <Heart size={20} strokeWidth={1.5} />
-                    </button>
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); /* كود تكبير */ }}
-                      className="text-gray-400 hover:text-black hover:scale-110 transition-all duration-300"
-                      title="Zoom Image"
-                    >
-                      <Maximize2 size={20} strokeWidth={1.5} />
+                      <Heart size={15} strokeWidth={1.8} className={isFav ? "fill-red-600 text-red-600" : ""} />
                     </button>
                   </div>
 
-                  <div className="absolute inset-0 hidden lg:flex flex-col items-center justify-center gap-2 opacity-0 group-hover/img:opacity-100 transition-opacity duration-500 bg-black/5 z-10">
+                  {/* زر المعاينة - أسفل اليمين */}
+                  <div className="absolute bottom-2.5 right-2.5 flex lg:hidden items-center gap-1.5 z-20">
                     <button 
                       onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
-                      className="relative w-[140px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-[#1a1a1a] group/btn1 overflow-hidden flex items-center justify-center shadow-md translate-y-4 group-hover/img:translate-y-0"
+                      className="w-8 h-8 rounded-full bg-white/95 text-black backdrop-blur-md flex items-center justify-center shadow-md active:scale-90 transition-transform"
+                      title="Quick View"
                     >
-                      <span className="text-[12px] font-medium tracking-wide text-black group-hover/btn1:opacity-0 transition-opacity duration-300">Quick view</span>
-                      <Eye size={18} className="absolute text-white opacity-0 translate-y-4 group-hover/btn1:opacity-100 group-hover/btn1:translate-y-0 transition-all duration-300" />
+                      <Eye size={15} strokeWidth={1.8} />
                     </button>
+                  </div>
+                </>
+              )}
 
+              {/* ===================== أزرار الكمبيوتر (Desktop Hover View) ===================== */}
+              {!isSingleCol && (
+                <>
+                  {/* الأزرار العائمة على الجنب (مفضلة وتكبير) */}
+                  <div className="absolute top-4 left-4 hidden lg:flex flex-col gap-2.5 opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 -translate-x-2 group-hover/card:translate-x-0">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); /* كود إضافة للسلة */ }}
-                      className="relative w-[140px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-[#1a1a1a] group/btn2 overflow-hidden flex items-center justify-center shadow-md translate-y-4 group-hover/img:translate-y-0 delay-75"
+                      onClick={(e) => { 
+                        e.stopPropagation(); 
+                        onToggleFavorite && onToggleFavorite(product.id);
+                      }}
+                      className={`w-9 h-9 rounded-full backdrop-blur-md flex items-center justify-center shadow-sm transition-all duration-300 hover:scale-110 ${
+                        isFav ? 'bg-white text-red-600' : 'bg-white/90 text-gray-600 hover:text-red-600 hover:bg-white'
+                      }`}
+                      title="Add to Favorites"
                     >
-                      <span className="text-[12px] font-medium tracking-wide text-black group-hover/btn2:opacity-0 transition-opacity duration-300">Quick Shop</span>
-                      <ShoppingCart size={18} className="absolute text-white opacity-0 translate-y-4 group-hover/btn2:opacity-100 group-hover/btn2:translate-y-0 transition-all duration-300" />
+                      <Heart size={17} strokeWidth={1.5} className={isFav ? "fill-red-600 text-red-600" : ""} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); }}
+                      className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-md flex items-center justify-center text-gray-600 hover:text-black hover:bg-white shadow-sm transition-all duration-300 hover:scale-110"
+                      title="Zoom Image"
+                    >
+                      <Maximize2 size={17} strokeWidth={1.5} />
+                    </button>
+                  </div>
+
+                  {/* زرار المعاينة السريعة الموحد في المنتصف */}
+                  <div className="absolute inset-0 hidden lg:flex flex-col items-center justify-center opacity-0 group-hover/card:opacity-100 transition-all duration-300 bg-black/10 backdrop-blur-[2px] z-10">
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
+                      className="relative w-[145px] h-[42px] bg-white text-black rounded-full transition-all duration-300 hover:bg-black hover:text-white group/btn1 overflow-hidden flex items-center justify-center shadow-lg translate-y-2 group-hover/card:translate-y-0"
+                    >
+                      <span className="text-[11px] font-bold tracking-widest uppercase transition-opacity duration-300 group-hover/btn1:opacity-0">
+                        Quick view
+                      </span>
+                      <Eye size={18} className="absolute opacity-0 translate-y-3 group-hover/btn1:opacity-100 group-hover/btn1:translate-y-0 transition-all duration-300" />
                     </button>
                   </div>
                 </>
               )}
             </div>
 
-            {/* تفاصيل المنتج المعروضة بأناقة (متجاوبة مع الـ Grid الموحد) */}
-            <div className={`flex flex-col items-start text-left justify-center flex-1 w-full ${isSingleCol ? 'px-4 md:px-0' : 'pt-5 px-1'}`}>
-              <div className={`flex items-center gap-2 ${isSingleCol ? 'mb-3' : 'mb-2'}`}>
-                <span className={`font-bold text-[#555] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.35em]' : 'text-[9px] tracking-[0.3em]'}`}>
+            {/* تفاصيل المنتج (بدون أسعار) */}
+            <div className={`flex flex-col items-start text-left justify-center flex-1 w-full ${isSingleCol ? 'px-4 md:px-0' : 'pt-3 lg:pt-5 px-1'}`}>
+              <div className={`flex items-center gap-2 ${isSingleCol ? 'mb-3' : 'mb-1.5 lg:mb-2'}`}>
+                <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.35em]' : 'text-[8px] lg:text-[9px] tracking-[0.25em] lg:tracking-[0.3em]'}`}>
                   {product.karat ? `${product.karat} GOLD` : 'NOUR JEWELLERY'}
                 </span>
                 {product.weight && (
                   <>
-                    <span className="w-[3px] h-[3px] rounded-full bg-[#999]"></span>
-                    <span className={`font-bold text-[#555] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.25em]' : 'text-[9px] tracking-[0.2em]'}`}>
+                    <span className="w-[3px] h-[3px] rounded-full bg-[#aaa]"></span>
+                    <span className={`font-bold text-[#666] uppercase ${isSingleCol ? 'text-[11px] tracking-[0.25em]' : 'text-[8px] lg:text-[9px] tracking-[0.2em]'}`}>
                       {product.weight}G
                     </span>
                   </>
                 )}
               </div>
 
-              <h3 className={`font-serif font-medium text-black uppercase ${isSingleCol ? 'text-2xl tracking-widest mb-4' : 'text-[14px] tracking-wider truncate w-full mb-2 hover:text-[#555] transition-colors'}`}>
+              <h3 className={`font-serif font-medium text-black uppercase transition-colors duration-300 group-hover:text-[#555] ${
+                isSingleCol ? 'text-xl md:text-2xl tracking-widest' : 'text-[12px] lg:text-[14px] tracking-wider truncate w-full'
+              }`}>
                 {product.name}
               </h3>
-
-              <div className={`flex items-center gap-4 ${isSingleCol ? 'mt-2' : ''}`}>
-                {hasSale && (
-                  <span className={`text-[#888] line-through font-medium ${isSingleCol ? 'text-xs tracking-widest' : 'text-[11px] tracking-widest'}`}>
-                    LE {product.old_price.toLocaleString()}
-                  </span>
-                )}
-                <span className={`text-black font-bold ${isSingleCol ? 'text-lg tracking-[0.15em]' : 'text-[13px] tracking-[0.15em]'}`}>
-                  LE {(product.price || 0).toLocaleString()}
-                </span>
-              </div>
             </div>
           </motion.div>
         );
