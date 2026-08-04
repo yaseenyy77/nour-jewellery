@@ -1,30 +1,50 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const FooterLinks = () => {
-  const links = [
-    { title: "Explore", items: ["Home", "Shop", "Investment", "About Us"] },
-    { title: "Support", items: ["Privacy", "Terms", "Shipping", "Contact"] }
+  const linkSections = [
+    {
+      title: "Navigation",
+      items: [
+        { label: "Home", path: "/" },
+        { label: "Collections", path: "/shop" },
+        { label: "Our Showroom", path: "/locations" },
+        { label: "Saved Items", path: "/wishlist" }
+      ]
+    },
+    {
+      title: "Collections",
+      items: [
+        { label: "Gold Rings", path: "/shop?category=rings" },
+        { label: "Earrings", path: "/shop?category=earrings" },
+        { label: "Necklaces", path: "/shop?category=necklaces" },
+        { label: "Bracelets", path: "/shop?category=bracelets" }
+      ]
+    }
   ];
 
   return (
-    <>
-      {links.map((group, index) => (
-        <div key={index} className="flex flex-col gap-3 items-center md:items-start">
-          <h3 className="text-[#d4af37] text-[9px] font-bold tracking-[0.2em] uppercase mb-1">
-            {group.title}
-          </h3>
-          <ul className="flex flex-col gap-2 items-center md:items-start">
-            {group.items.map((item, i) => (
+    <div className="grid grid-cols-2 gap-8 sm:gap-12 text-left">
+      {linkSections.map((section, idx) => (
+        <div key={idx} className="space-y-3">
+          <h4 className="text-xs font-semibold uppercase tracking-[0.2em] text-white">
+            {section.title}
+          </h4>
+          <ul className="space-y-2">
+            {section.items.map((item, i) => (
               <li key={i}>
-                <a href={`#${item}`} className="text-gray-500 hover:text-white text-[10px] font-medium tracking-widest uppercase transition-all duration-300">
-                  {item}
-                </a>
+                <Link 
+                  to={item.path} 
+                  className="text-xs text-neutral-400 hover:text-white transition-colors duration-200 font-light"
+                >
+                  {item.label}
+                </Link>
               </li>
             ))}
           </ul>
         </div>
       ))}
-    </>
+    </div>
   );
 };
 

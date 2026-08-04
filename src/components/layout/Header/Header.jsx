@@ -21,21 +21,25 @@ const Header = ({ onOpenMenu }) => {
       
       <MegaMenu isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)} />
 
-      <div className="w-full px-4 sm:px-8 h-[80px] sm:h-[90px] flex items-center justify-between border-b border-gray-100">
+      <div className="w-full px-3 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between border-b border-gray-100">
         
-        {/* اليسار: أيقونات المستخدم */}
+        {/* اليسار: أدوات المستخدم */}
         <div className="flex-1 flex justify-start items-center">
           <UserMenu />
         </div>
 
-        {/* المنتصف: اللوجو */}
-        <div className="flex-shrink-0 flex justify-center items-center">
-          <Link to="/">
-            <img src={nourLogo} alt="Nour Gold Jewellery" className="h-12 sm:h-16 w-auto object-contain" />
+        {/* المنتصف: اللوجو متناسق تماماً مع شاشات الموبايل واللاب */}
+        <div className="flex-shrink-0 flex justify-center items-center px-2">
+          <Link to="/" className="block">
+            <img 
+              src={nourLogo} 
+              alt="Nour Gallery Jewelry" 
+              className="h-9 sm:h-12 md:h-14 w-auto object-contain transition-all" 
+            />
           </Link>
         </div>
 
-        {/* اليمين: زر المنيو الجانبي */}
+        {/* اليمين: زر فتح القائمة */}
         <div className="flex-1 flex justify-end items-center">
           <Navbar onOpenMenu={handleOpenMenu} />
         </div>

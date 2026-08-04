@@ -6,37 +6,37 @@ const UserMenu = ({ favoritesCount = 0 }) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center gap-1 sm:gap-3">
-      {/* أيقونة الحساب - للشاشات الكبيرة */}
+    <div className="flex items-center gap-0.5 sm:gap-2">
+      {/* حساب المستخدم - للشاشات المتوسطة والكبيرة */}
       <button 
         onClick={() => navigate('/account')}
-        className="hidden md:flex p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer"
+        className="hidden md:flex p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer rounded-full hover:bg-gray-50"
         title="Account"
       >
-        <FiUser size={22} strokeWidth={1.5} />
+        <FiUser size={20} strokeWidth={1.5} />
       </button>
 
-      {/* أيقونة المفضلة (Wishlist) */}
+      {/* البحث */}
+      <button 
+        onClick={() => navigate('/shop')}
+        className="p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer rounded-full hover:bg-gray-50"
+        title="Search Products"
+      >
+        <FiSearch className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={1.5} />
+      </button>
+
+      {/* المفضلة */}
       <button 
         onClick={() => navigate('/wishlist')}
-        className="relative p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer group"
+        className="relative p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer rounded-full hover:bg-gray-50"
         title="Wishlist"
       >
-        <FiHeart size={22} strokeWidth={1.5} />
+        <FiHeart className="w-5 h-5 sm:w-5 sm:h-5" strokeWidth={1.5} />
         {favoritesCount > 0 && (
-          <span className="absolute top-1 right-0 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+          <span className="absolute top-1 right-1 bg-black text-white text-[8px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white">
             {favoritesCount}
           </span>
         )}
-      </button>
-
-      {/* أيقونة البحث */}
-      <button 
-        onClick={() => navigate('/shop')}
-        className="p-2 text-black hover:text-[#C5A059] transition-colors cursor-pointer"
-        title="Search Products"
-      >
-        <FiSearch size={22} strokeWidth={1.5} />
       </button>
     </div>
   );
