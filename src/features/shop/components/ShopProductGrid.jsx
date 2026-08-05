@@ -3,7 +3,6 @@ import { motion } from 'framer-motion';
 import { Eye, Heart, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
-// استيراد الـ Wishlist Context
 import { useWishlist } from '../../../context/WishlistContext';
 
 const ShopProductGrid = ({ 
@@ -15,7 +14,6 @@ const ShopProductGrid = ({
   const navigate = useNavigate();
   const { favorites: contextFavorites, addToWishlist, removeFromWishlist } = useWishlist();
 
-  // ضبط المسافات في الموبايل لتكون متناسقة وصغيرة بدون هدر للمساحة
   const getGridClasses = () => {
     switch (gridCols) {
       case 1: return 'grid-cols-1 gap-y-8';
@@ -90,7 +88,6 @@ const ShopProductGrid = ({
                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/card:scale-105"
               />
 
-              {/* أزرار أجهزة اللمس (الموبايل، التابلت، والأيباد حتى 1024px) - ظاهرة دائماً بدون Hover */}
               {!isSingleCol && (
                 <>
                   <div className="absolute top-2 left-2 flex xl:hidden z-20">
@@ -119,7 +116,6 @@ const ShopProductGrid = ({
                 </>
               )}
 
-              {/* أزرار الكمبيوتر والشاشات الكبيرة (تظهر عند الـ Hover فقط ابتداءً من xl: 1280px) */}
               {!isSingleCol && (
                 <>
                   <div className="absolute top-3 left-3 hidden xl:flex flex-col gap-2 opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 -translate-x-2 group-hover/card:translate-x-0">
@@ -159,7 +155,7 @@ const ShopProductGrid = ({
               )}
             </div>
 
-            {/* تفاصيل المنتج مقاسة بدقة للموبايل */}
+            {/* تفاصيل المنتج */}
             <div className={`flex flex-col items-start text-left justify-between flex-1 w-full ${isSingleCol ? 'px-2 md:px-0' : 'pt-2.5 sm:pt-3 px-0.5'}`}>
               <div className="w-full">
                 <div className="flex items-center gap-1.5 mb-1">
@@ -182,20 +178,6 @@ const ShopProductGrid = ({
                   {product.name}
                 </h3>
               </div>
-
-              {/* السعر */}
-              {product.price && (
-                <div className="flex items-center gap-2 mt-1.5">
-                  {product.old_price && product.old_price > product.price && (
-                    <span className="text-[9px] sm:text-[10px] text-gray-400 line-through font-medium">
-                      LE {product.old_price.toLocaleString()}
-                    </span>
-                  )}
-                  <p className="text-[11px] sm:text-xs font-bold text-black tracking-wider">
-                    LE {product.price.toLocaleString()}
-                  </p>
-                </div>
-              )}
             </div>
           </motion.div>
         );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../../../supabaseClient'; // اضبط المسار حسب مشروعك
+import { supabase } from '../../../../supabaseClient';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, Sparkles, RefreshCw, Plus } from 'lucide-react';
 
@@ -99,14 +99,12 @@ const ProductTable = () => {
                   <th className="py-4 px-6">Piece</th>
                   <th className="py-4 px-4">Category</th>
                   <th className="py-4 px-4">Karat & Weight</th>
-                  <th className="py-4 px-4">Price</th>
                   <th className="py-4 px-4">Status</th>
                   <th className="py-4 px-6 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 text-xs">
                 {products.map((p) => {
-                  const hasDiscount = p.old_price && p.old_price > p.price;
                   return (
                     <tr key={p.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="py-4 px-6 flex items-center gap-4">
@@ -132,15 +130,6 @@ const ProductTable = () => {
                         {p.weight_grams && (
                           <span className="block text-[10px] text-gray-400">
                             {p.weight_grams} Grams
-                          </span>
-                        )}
-                      </td>
-
-                      <td className="py-4 px-4 font-bold text-black">
-                        <div>LE {p.price?.toLocaleString()}</div>
-                        {hasDiscount && (
-                          <span className="text-[10px] text-gray-400 line-through font-normal">
-                            LE {p.old_price?.toLocaleString()}
                           </span>
                         )}
                       </td>

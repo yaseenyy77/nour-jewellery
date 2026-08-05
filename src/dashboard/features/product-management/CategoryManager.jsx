@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../../../supabaseClient'; // اضبط المسار حسب مشروعك
+import { supabase } from '../../../../supabaseClient';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Layers, ChevronRight, Trash2, Sparkles } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Sparkles } from 'lucide-react';
 
 const CategoryManager = () => {
   const [products, setProducts] = useState([]);
@@ -128,7 +128,6 @@ const CategoryManager = () => {
                 <tr className="border-b border-gray-100 bg-[#fbfbfb] text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">
                   <th className="py-4 px-6">Piece</th>
                   <th className="py-4 px-4">Specs</th>
-                  <th className="py-4 px-4">Price</th>
                   <th className="py-4 px-4">Status</th>
                 </tr>
               </thead>
@@ -150,10 +149,6 @@ const CategoryManager = () => {
                     <td className="py-4 px-4 text-gray-600">
                       <span className="font-bold">{p.karat || '18k'}</span>
                       {p.weight_grams && <span className="block text-[10px] text-gray-400">{p.weight_grams}g</span>}
-                    </td>
-
-                    <td className="py-4 px-4 font-bold text-black">
-                      LE {p.price?.toLocaleString()}
                     </td>
 
                     <td className="py-4 px-4">

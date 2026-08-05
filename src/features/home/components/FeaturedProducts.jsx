@@ -6,7 +6,6 @@ import { Eye, ChevronLeft, ChevronRight, Heart, Maximize2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// استيراد الـ Wishlist Context
 import { useWishlist } from '../../../context/WishlistContext';
 
 import 'swiper/css';
@@ -68,7 +67,6 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
       <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 relative group/slider">
         <Swiper
           modules={[Navigation, Pagination, Autoplay]}
-          // توزيع متناسق للأحجام على الموبايل والتابلت واللاب توب
           breakpoints={{ 
             0: { slidesPerView: 2, spaceBetween: 10 },
             640: { slidesPerView: 2.5, spaceBetween: 14 },
@@ -80,7 +78,6 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
           className="pb-10"
         >
           {products.map((product) => {
-            const hasSale = product.old_price && product.old_price > product.price;
             const mainImg = product.images?.[0] || 'https://via.placeholder.com/400';
 
             const isFav = favorites?.some((item) => String(item.id) === String(product.id));
@@ -102,21 +99,12 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
                 >
                   {/* حاوية الصورة */}
                   <div className="relative aspect-[4/5] bg-[#fdfdfd] overflow-hidden flex items-center justify-center group/img border border-gray-100 rounded-sm">
-                    
-                    {/* شارة الخصم */}
-                    {hasSale && (
-                      <div className="absolute top-2 right-2 z-10 bg-black text-white text-[7px] sm:text-[8px] font-bold tracking-[0.15em] uppercase px-1.5 py-0.5 shadow-xs">
-                        SALE
-                      </div>
-                    )}
-                    
                     <img 
                       src={mainImg} 
                       alt={product.name} 
                       className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover/img:scale-105"
                     />
 
-                    {/* أزرار أجهزة اللمس (الموبايل، التابلت، الأيباد حتى 1024px) - ظاهرة دائماً */}
                     <div className="absolute top-2 left-2 flex xl:hidden z-20">
                       <button 
                         type="button"
@@ -141,7 +129,6 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
                       </button>
                     </div>
 
-                    {/* أزرار الكمبيوتر والشاشات الكبيرة (تظهر عند الـ Hover فقط من xl: 1280px) */}
                     <div className="absolute top-3 left-3 hidden xl:flex flex-col gap-2 opacity-0 group-hover/img:opacity-100 transition-all duration-300 z-20">
                       <button 
                         type="button"
@@ -196,17 +183,6 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
                         {product.name}
                       </h3>
                     </div>
-
-                    <div className="flex items-center gap-2 mt-1">
-                      {hasSale && (
-                        <span className="text-[9px] sm:text-[10px] text-gray-400 line-through font-medium">
-                          LE {product.old_price.toLocaleString()}
-                        </span>
-                      )}
-                      <p className="text-[11px] sm:text-xs text-black font-bold tracking-wider">
-                        LE {product.price?.toLocaleString()}
-                      </p>
-                    </div>
                   </div>
                 </motion.div>
               </SwiperSlide>
@@ -214,7 +190,6 @@ const FeaturedProducts = ({ title = "Collection", category = "rings" }) => {
           })}
         </Swiper>
 
-        {/* أسهم التنقل للشاشات الكبيرة */}
         <button className={`prev-${swiperId} absolute left-0 lg:left-1 top-[38%] -translate-y-1/2 z-30 w-8 h-8 hidden md:flex items-center justify-center bg-white/90 backdrop-blur-sm rounded-full shadow-sm text-neutral-700 opacity-0 group-hover/slider:opacity-100 transition-all hover:bg-black hover:text-white`}>
           <ChevronLeft size={16} />
         </button>

@@ -163,7 +163,7 @@ const AddProduct = () => {
               </div>
             </div>
 
-            {/* صف العيار والجرام الجديد */}
+            {/* صف العيار والجرام */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Karat (العيار)</label>
@@ -187,7 +187,7 @@ const AddProduct = () => {
           </div>
         </div>
 
-        {/* قسم رفع الصور زي ما هو بس بستايل متجاوب */}
+        {/* قسم رفع الصور */}
         <div className="space-y-6">
           <div className="bg-white p-6 sm:p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col h-full">
             <div className="flex items-center justify-between border-b border-gray-100 pb-4 mb-6">
